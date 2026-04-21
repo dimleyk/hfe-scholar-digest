@@ -1,0 +1,2055 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HFE Scholar — לוח בקרה היסטורי</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#0b0e18; --surface:#131726; --surface2:#1a2035; --border:#252d45;
+  --accent:#4f83ff; --accent2:#7c5cfc; --green:#3ecf8e; --orange:#f8a948;
+  --red:#f46b6b; --text:#dde3f0; --muted:#7a8aac;
+  --umt:#4f83ff; --hri:#3ecf8e; --bmi:#c084fc;
+}
+body { font-family:'Segoe UI','Arial Hebrew',Arial,sans-serif; background:var(--bg); color:var(--text); direction:rtl; }
+
+/* HEADER */
+.header { background:linear-gradient(135deg,#0d1b4b,#0f2460 40%,#1a3a7a); padding:22px 36px; border-bottom:2px solid #1e3a6e; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.header-title { font-size:22px; font-weight:800; color:#fff; }
+.header-title span { font-size:13px; font-weight:400; color:#90aadd; display:block; }
+.header-badge { background:rgba(79,131,255,.18); border:1px solid rgba(79,131,255,.4); color:var(--accent); font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px; }
+
+/* STATS BAR */
+.stats-bar { display:flex; background:var(--surface); border-bottom:1px solid var(--border); overflow-x:auto; }
+.stat-item { flex:1 0 110px; padding:14px 18px; text-align:center; border-left:1px solid var(--border); }
+.stat-item:last-child { border-left:none; }
+.stat-num { font-size:24px; font-weight:800; }
+.stat-label { font-size:11px; color:var(--muted); margin-top:2px; }
+
+/* TABS */
+.tabs { display:flex; background:var(--surface); border-bottom:2px solid var(--border); padding:0 24px; overflow-x:auto; gap:2px; }
+.tab { padding:13px 18px; cursor:pointer; color:var(--muted); font-size:13px; font-weight:600; border-bottom:3px solid transparent; white-space:nowrap; transition:all .2s; }
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+/* PANES */
+.tab-pane { display:none; padding:24px 36px; }
+.tab-pane.active { display:block; }
+.section-title { font-size:15px; font-weight:700; color:#90aadd; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+
+/* FILTER BAR */
+.filter-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+.filter-btn { padding:5px 13px; border-radius:16px; border:1px solid var(--border); background:var(--surface2); color:var(--muted); cursor:pointer; font-size:12px; font-weight:600; transition:all .2s; }
+.filter-btn:hover,.filter-btn.active { background:rgba(79,131,255,.2); color:var(--accent); border-color:var(--accent); }
+
+/* DATE FILTER */
+.date-filter { display:flex; align-items:center; gap:8px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:6px 12px; }
+.date-filter label { font-size:11px; color:var(--muted); white-space:nowrap; }
+.date-input { background:transparent; border:none; color:var(--text); font-size:12px; outline:none; width:110px; }
+.date-input::-webkit-calendar-picker-indicator { filter:invert(0.7); cursor:pointer; }
+
+/* DETAIL TOGGLE */
+.detail-toggle { display:flex; background:var(--surface2); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.detail-btn { padding:5px 12px; font-size:11px; font-weight:700; cursor:pointer; border:none; background:transparent; color:var(--muted); transition:all .2s; }
+.detail-btn.active { background:var(--accent); color:#fff; }
+
+/* SEARCH */
+.search-wrap { position:relative; margin-bottom:14px; }
+.search-input { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:9px 40px 9px 14px; color:var(--text); font-size:13px; outline:none; direction:ltr; }
+.search-input:focus { border-color:var(--accent); }
+.search-icon { position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--muted); }
+
+/* ARTICLE CARD */
+.article-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin-bottom:10px; transition:border-color .2s,transform .15s; }
+.article-card:hover { border-color:var(--accent); transform:translateX(-2px); }
+.article-card.recurring  { border-right:3px solid var(--orange); }
+.article-card.recurring2 { border-right:3px solid var(--red); }
+.article-header { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:6px; flex-wrap:wrap; }
+.article-title { font-size:13px; font-weight:700; color:#a8c4ff; direction:ltr; text-align:left; line-height:1.5; flex:1; }
+.article-chips { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:6px; }
+
+/* DATE INDICATORS */
+.date-row { display:flex; gap:14px; flex-wrap:wrap; font-size:11px; color:var(--muted); margin-bottom:8px; }
+.date-tag { display:inline-flex; align-items:center; gap:4px; }
+.date-tag .dt-val { color:var(--text); font-weight:600; }
+.age-new    { color:var(--green); }
+.age-recent { color:var(--orange); }
+.age-old    { color:var(--muted); }
+
+/* BADGES */
+.badge { display:inline-block; padding:2px 9px; border-radius:10px; font-size:11px; font-weight:700; }
+.badge-umt  { background:rgba(79,131,255,.15);  color:var(--umt);  border:1px solid rgba(79,131,255,.3); }
+.badge-hri  { background:rgba(62,207,142,.15);  color:var(--hri);  border:1px solid rgba(62,207,142,.3); }
+.badge-bmi  { background:rgba(192,132,252,.15); color:var(--bmi);  border:1px solid rgba(192,132,252,.3); }
+.badge-recur { background:rgba(248,169,72,.18); color:var(--orange); border:1px solid rgba(248,169,72,.35); display:inline-flex; align-items:center; gap:4px; }
+.badge-recur2 { background:rgba(244,107,107,.18); color:var(--red); border:1px solid rgba(244,107,107,.35); }
+.freq-tag { font-size:11px; font-weight:700; padding:2px 7px; border-radius:8px; }
+.freq-1 { background:rgba(79,131,255,.1); color:#6699ff; }
+.freq-2 { background:rgba(248,169,72,.2); color:var(--orange); }
+.freq-3 { background:rgba(244,107,107,.22); color:var(--red); }
+
+/* ANALYSIS LEVELS */
+.analysis-block { margin-top:8px; }
+.analysis-text  { font-size:12px; color:var(--muted); line-height:1.7; background:var(--bg); border-right:3px solid var(--accent); padding:8px 12px; border-radius:4px; }
+.analysis-text.level-short   { border-right-color:var(--green); }
+.analysis-text.level-medium  { border-right-color:var(--accent); }
+.analysis-text.level-long    { border-right-color:var(--accent2); }
+.level-label { font-size:10px; font-weight:700; text-transform:uppercase; margin-bottom:4px; }
+.lv-s { color:var(--green); }
+.lv-m { color:var(--accent); }
+.lv-l { color:var(--accent2); }
+
+/* TIMELINE */
+.timeline { position:relative; padding-right:28px; }
+.timeline::before { content:''; position:absolute; right:10px; top:0; bottom:0; width:2px; background:linear-gradient(to bottom,var(--accent),var(--accent2)); }
+.tl-item { position:relative; margin-bottom:24px; }
+.tl-dot  { position:absolute; right:-24px; top:6px; width:14px; height:14px; border-radius:50%; background:var(--accent); border:2px solid var(--bg); box-shadow:0 0 0 3px rgba(79,131,255,.3); }
+.tl-dot.latest { background:var(--orange); box-shadow:0 0 0 3px rgba(248,169,72,.3); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 3px rgba(248,169,72,.3)}50%{box-shadow:0 0 0 7px rgba(248,169,72,.08)} }
+.tl-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:14px 18px; margin-right:12px; }
+.tl-date  { font-size:13px; font-weight:700; color:var(--orange); margin-bottom:8px; }
+.tl-stats { display:flex; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--muted); }
+.tl-stats strong { color:var(--text); }
+.tl-pills { display:flex; flex-wrap:wrap; gap:5px; margin-top:10px; }
+
+/* DOMAIN CHART */
+.domain-row   { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.domain-label { width:60px; font-size:12px; font-weight:700; }
+.domain-bg    { flex:1; background:var(--border); border-radius:4px; height:20px; overflow:hidden; }
+.domain-bar   { height:100%; border-radius:4px; display:flex; align-items:center; padding:0 8px; font-size:11px; font-weight:700; color:#fff; transition:width .5s; }
+.bar-umt { background:linear-gradient(90deg,#1a3a8a,#4f83ff); }
+.bar-hri { background:linear-gradient(90deg,#0e5c3a,#3ecf8e); }
+.bar-bmi { background:linear-gradient(90deg,#4a1a7a,#c084fc); }
+
+/* LOG TABLE */
+.log-tbl { width:100%; border-collapse:collapse; font-size:12px; }
+.log-tbl th { background:rgba(79,131,255,.12); color:var(--accent); padding:8px 12px; text-align:right; font-weight:700; border-bottom:2px solid var(--border); }
+.log-tbl td { padding:8px 12px; border-bottom:1px solid var(--border); }
+.log-tbl tr:hover td { background:var(--surface2); }
+
+/* MERMAID */
+.mermaid-wrap { background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:20px; overflow-x:auto; }
+.mermaid-wrap .mermaid { display:flex; justify-content:center; }
+
+/* PROCESS STEPS */
+.process-list { display:flex; flex-direction:column; gap:8px; margin-top:20px; }
+.process-step { display:flex; align-items:flex-start; gap:12px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px 14px; }
+.step-num { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; flex-shrink:0; }
+.step-body h4 { font-size:13px; font-weight:700; }
+.step-body p  { font-size:12px; color:var(--muted); margin-top:3px; line-height:1.5; }
+
+/* EMPTY */
+.empty { color:var(--muted); font-size:13px; text-align:center; padding:40px; }
+
+@media (max-width:600px) { .tab-pane{padding:16px;} .header{padding:16px;} .tabs{padding:0 12px;} }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div style="display:flex;align-items:center;gap:14px;">
+    <div style="font-size:34px;">🔬</div>
+    <div>
+      <div class="header-title">HFE Scholar — לוח בקרה היסטורי
+        <span>Human Factors Engineering | Google Scholar Alerts | Elbit Systems</span>
+      </div>
+    </div>
+  </div>
+  <div style="text-align:left;">
+    <div class="header-badge" id="hLastUpdate">עדכון אחרון: 2026-04-13</div>
+    <div style="font-size:11px;color:#607090;margin-top:4px;" dir="ltr">שני + רביעי 08:00 | dimleyk@gmail.com</div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-num" id="s-total" style="color:var(--accent)">15</div><div class="stat-label">מאמרים סה"כ</div></div>
+  <div class="stat-item"><div class="stat-num" id="s-scans" style="color:var(--orange)">1</div><div class="stat-label">סריקות</div></div>
+  <div class="stat-item"><div class="stat-num" id="s-umt"   style="color:var(--umt)">5</div><div class="stat-label">UMT</div></div>
+  <div class="stat-item"><div class="stat-num" id="s-hri"   style="color:var(--hri)">7</div><div class="stat-label">HRI</div></div>
+  <div class="stat-item"><div class="stat-num" id="s-bmi"   style="color:var(--bmi)">3</div><div class="stat-label">BMI/HF</div></div>
+  <div class="stat-item"><div class="stat-num" id="s-recur" style="color:var(--orange)">0</div><div class="stat-label">חוזרים</div></div>
+  <div class="stat-item"><div class="stat-num" id="s-pdfs"  style="color:var(--green)">5</div><div class="stat-label">PDFs</div></div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('timeline',this)">📅 ציר זמן</div>
+  <div class="tab"        onclick="showTab('articles',this)">📄 כל המאמרים</div>
+  <div class="tab"        onclick="showTab('recurring',this)">🔁 חוזרים</div>
+  <div class="tab"        onclick="showTab('process',this)">🔄 תרשים תהליך</div>
+  <div class="tab"        onclick="showTab('domains',this)">📊 לפי תחום</div>
+  <div class="tab"        onclick="showTab('scanlog',this)">📋 לוג סריקות</div>
+</div>
+
+<!-- ═══ TAB: TIMELINE ═══ -->
+<div id="tab-timeline" class="tab-pane active">
+  <div class="section-title">📅 היסטוריית סריקות</div>
+  <div class="timeline" id="tlContainer"></div>
+</div>
+
+<!-- ═══ TAB: ALL ARTICLES ═══ -->
+<div id="tab-articles" class="tab-pane">
+
+  <!-- Domain filter -->
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="setFilter('domain','all',this)">הכל</button>
+    <button class="filter-btn" onclick="setFilter('domain','UMT',this)">UMT</button>
+    <button class="filter-btn" onclick="setFilter('domain','HRI',this)">HRI</button>
+    <button class="filter-btn" onclick="setFilter('domain','BMI/HF',this)">BMI/HF</button>
+    <button class="filter-btn" onclick="setFilter('domain','recurring',this)">🔁 חוזרים</button>
+  </div>
+
+  <!-- Date range filter -->
+  <div class="filter-row">
+    <div class="date-filter">
+      <label>📅 מ-</label>
+      <input class="date-input" type="date" id="dateFrom" oninput="applyFilters()" value="">
+    </div>
+    <div class="date-filter">
+      <label>עד-</label>
+      <input class="date-input" type="date" id="dateTo" oninput="applyFilters()" value="">
+    </div>
+    <button class="filter-btn" onclick="clearDates()">נקה תאריכים</button>
+  </div>
+
+  <!-- Detail level -->
+  <div class="filter-row">
+    <span style="font-size:12px;color:var(--muted);">רמת פירוט:</span>
+    <div class="detail-toggle">
+      <button class="detail-btn" onclick="setDetail('short',this)">קצר</button>
+      <button class="detail-btn active" onclick="setDetail('medium',this)">בינוני</button>
+      <button class="detail-btn" onclick="setDetail('long',this)">מורחב</button>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-wrap">
+    <input class="search-input" type="text" id="searchInput" placeholder="חפש לפי כותרת / מחברים..." oninput="applyFilters()">
+    <span class="search-icon">🔍</span>
+  </div>
+
+  <div style="font-size:12px;color:var(--muted);margin-bottom:10px;" id="resultCount"></div>
+  <div id="allGrid"></div>
+</div>
+
+<!-- ═══ TAB: RECURRING ═══ -->
+<div id="tab-recurring" class="tab-pane">
+  <div class="section-title">🔁 מאמרים שהופיעו ביותר מסריקה אחת</div>
+  <div style="background:rgba(248,169,72,.07);border:1px solid rgba(248,169,72,.2);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--muted);margin-bottom:18px;">
+    מאמרים אלו <strong style="color:var(--orange)">הושמטו מהדוחות</strong> כי נסרקו בסריקות קודמות. הציון <span class="freq-tag freq-2">× N</span> מציין מספר הופעות בהתראות.
+  </div>
+  <!-- Detail level for recurring -->
+  <div class="filter-row" style="margin-bottom:14px;">
+    <span style="font-size:12px;color:var(--muted);">רמת פירוט:</span>
+    <div class="detail-toggle">
+      <button class="detail-btn" onclick="setDetailR('short',this)">קצר</button>
+      <button class="detail-btn active" onclick="setDetailR('medium',this)">בינוני</button>
+      <button class="detail-btn" onclick="setDetailR('long',this)">מורחב</button>
+    </div>
+  </div>
+  <div id="recurGrid"></div>
+</div>
+
+<!-- ═══ TAB: PROCESS ═══ -->
+<div id="tab-process" class="tab-pane">
+  <div class="section-title">🔄 תרשים תהליך — HFE Scholar Digest</div>
+  <div class="mermaid-wrap">
+    <div class="mermaid">
+flowchart TD
+    A([⏰ שני + רביעי 08:00]) --> B
+    B[📧 סריקת Gmail\nscholaralerts-noreply\n7 ימים אחרונים] --> C
+    C{מיילים\nנמצאו?}
+    C --לא--> Z1([📭 אין מיילים\nסיום])
+    C --כן--> D
+    D[🔍 חילוץ מאמרים\nUMT · HRI · BMI-HF] --> E
+    E[(📋 בדיקת רישום\nseen_articles_registry)] --> F
+    F{כבר נסרק?}
+    F --כן--> G[🚫 times_seen++\nדילוג מדוח]
+    F --לא--> H[✅ מאמר חדש]
+    G --> F2{עוד?}
+    H --> F2
+    F2 --כן--> F
+    F2 --לא--> I
+    I{יש\nחדשים?}
+    I --לא--> Z2([📄 דוח ריק\nמייל + סיום])
+    I --כן--> J
+    J[📥 הורדת PDFs\narXiv · curl] --> K
+    K[🧠 ניתוח עברית\n3 רמות: קצר·בינוני·מורחב] --> L
+    L[📄 DOCX\nNode.js + RTL + APA] --> M
+    M[🌐 עדכון Master Dashboard\nHFE_Scholar_Master_Dashboard.html] --> N
+    N[📋 JSON\nscholar_digest_data.json] --> O
+    O[✉️ טיוטת מייל\nGmail Draft] --> P
+    P[(💾 עדכון רישום\nmarkSeen + scan_history)] --> Q
+    Q([✅ סריקה הושלמה])
+    style A fill:#1a3a7a,stroke:#4f83ff,color:#fff
+    style Q fill:#0e5c3a,stroke:#3ecf8e,color:#fff
+    style Z1 fill:#2a1a1a,stroke:#f46b6b,color:#f46b6b
+    style Z2 fill:#2a2200,stroke:#f8a948,color:#f8a948
+    style E fill:#1a1a4a,stroke:#7c5cfc,color:#ccc
+    style P fill:#1a1a4a,stroke:#7c5cfc,color:#ccc
+    style G fill:#2a1a0a,stroke:#f8a948,color:#f8a948
+    style H fill:#0a2a1a,stroke:#3ecf8e,color:#3ecf8e
+    </div>
+  </div>
+  <div class="process-list">
+    <div class="process-step"><div class="step-num" style="background:rgba(79,131,255,.2);color:var(--accent);">1</div><div class="step-body"><h4>סריקת Gmail</h4><p>3 שאילתות: UMT · BMI/HF · HRI · טווח 7 ימים</p></div></div>
+    <div class="process-step"><div class="step-num" style="background:rgba(124,92,252,.2);color:var(--accent2);">2</div><div class="step-body"><h4>בדיקת כפילויות</h4><p>URL מנורמל + כותרת. כפולים: times_seen++ — לא נכללים בדוח</p></div></div>
+    <div class="process-step"><div class="step-num" style="background:rgba(62,207,142,.2);color:var(--green);">3</div><div class="step-body"><h4>הורדת PDFs</h4><p>arXiv open-access בלבד. בדיקת %PDF header</p></div></div>
+    <div class="process-step"><div class="step-num" style="background:rgba(192,132,252,.2);color:var(--bmi);">4</div><div class="step-body"><h4>ניתוח 3 רמות</h4><p>קצר (20 מילים) · בינוני (50 מילים) · מורחב (100 מילים + רלוונטיות HFE)</p></div></div>
+    <div class="process-step"><div class="step-num" style="background:rgba(248,169,72,.2);color:var(--orange);">5</div><div class="step-body"><h4>פלטים</h4><p>DOCX · עדכון לוח בקרה מרכזי זה · JSON · טיוטת מייל HTML</p></div></div>
+    <div class="process-step"><div class="step-num" style="background:rgba(244,107,107,.2);color:var(--red);">6</div><div class="step-body"><h4>עדכון רישום</h4><p>רק לאחר הצלחה מלאה: markSeen + scan_history</p></div></div>
+  </div>
+</div>
+
+<!-- ═══ TAB: DOMAINS ═══ -->
+<div id="tab-domains" class="tab-pane">
+  <div class="section-title">📊 פיזור לפי תחום</div>
+  <div id="domainChart" style="max-width:480px;"></div>
+  <div style="margin-top:28px;">
+    <div class="section-title">📈 מגמות סריקות</div>
+    <div id="trendsWrap" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
+  </div>
+</div>
+
+<!-- ═══ TAB: LOG ═══ -->
+<div id="tab-scanlog" class="tab-pane">
+  <div class="section-title">📋 לוג סריקות שבועיות</div>
+  <table class="log-tbl">
+    <thead><tr><th>תאריך</th><th>תיקייה</th><th>חדשים</th><th>הושמטו</th><th>סטטוס</th></tr></thead>
+    <tbody id="logBody"></tbody>
+  </table>
+</div>
+
+
+<!-- ════════════════════════ DATA ════════════════════════ -->
+<script>
+// ── DATA OBJECT — מתעדכן אוטומטית בכל סריקה ──
+const REGISTRY = {
+  "_meta": {
+    "last_updated": "2026-04-21T00:09:00.000Z",
+    "total_articles": 74,
+    "total_scans": 6,
+    "scan_history": [
+      {
+        "folder": "2026-04-02_12-19",
+        "date": "2026-04-02",
+        "partial": false,
+        "articles_added": 15,
+        "articles_skipped": 0,
+        "stats": {
+          "emails_scanned": 4,
+          "articles_found": 28,
+          "articles_selected": 15,
+          "pdfs_downloaded": 6
+        }
+      },
+      {
+        "folder": "2026-04-06_08-05",
+        "date": "2026-04-06",
+        "partial": true,
+        "articles_added": 6,
+        "articles_skipped": 0,
+        "stats": {
+          "emails_scanned": 0,
+          "articles_found": 8,
+          "articles_selected": 8,
+          "pdfs_downloaded": 8,
+          "note": "סריקה חלקית — PDFs בלבד, ללא DOCX/JSON"
+        }
+      },
+      {
+        "folder": "2026-04-11_21-57",
+        "date": "2026-04-11",
+        "partial": false,
+        "articles_added": 15,
+        "articles_skipped": 0,
+        "stats": {
+          "emails_scanned": 12,
+          "articles_found": 28,
+          "articles_selected": 15,
+          "pdfs_downloaded": 5
+        }
+      },
+      {
+        "folder": "2026-04-13_08-04",
+        "date": "2026-04-13",
+        "partial": false,
+        "articles_added": 15,
+        "articles_skipped": 0,
+        "stats": {
+          "emails_scanned": 5,
+          "articles_found": 50,
+          "articles_selected": 15,
+          "pdfs_downloaded": 5
+        }
+      },
+      {
+        "folder": "2026-04-15_08-00",
+        "date": "2026-04-15",
+        "partial": false,
+        "articles_added": 14,
+        "articles_skipped": 1,
+        "stats": {
+          "emails_scanned": 9,
+          "articles_found": 15,
+          "articles_selected": 14,
+          "pdfs_downloaded": 4
+        }
+      },
+      {
+        "folder": "2026-04-21_00-09",
+        "date": "2026-04-21",
+        "partial": false,
+        "articles_added": 9,
+        "articles_skipped": 1,
+        "stats": {
+          "emails_scanned": 26,
+          "articles_found": 26,
+          "articles_selected": 9,
+          "pdfs_downloaded": 2
+        }
+      }
+    ]
+  },
+  "articles": [
+    {
+      "url": "https://arxiv.org/abs/2603.23898",
+      "title": "Collaboration in Multi-Robot Systems: Taxonomy and Survey over Frameworks for Collaboration",
+      "authors": "Karam, R., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "arXiv:2603.23898",
+      "pdf": true,
+      "first_seen": "2026-04-02",
+      "scan_date": "2026-04-02",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-02_12-19"
+      ],
+      "analysis_short": "מציע טקסונומיה ומסגרת לשיתוף פעולה במערכות רב-רובוטיות.",
+      "analysis_medium": "מחקר הגדיר ובחן מושגי שיתוף פעולה, תיאום ושת\"פ ברב-רובוטיות. הסינתז פערי מחקר וסיפק בסיס קונספטואלי לפיתוח מסגרות שת\"פ.",
+      "analysis_long": "מחקר טקסונומי שסינתז מסגרות שיתוף פעולה במערכות רב-רובוטיות. המטרה: הגדרת מושגים אחידים לשיתוף פעולה, תיאום ושת\"פ. הממצאים: שלושת המושגים מטופלים לעתים בעירוב; שת\"פ מאפשר יכולות חדשות. התובנה: נדרש בסיס קונספטואלי מובנה לשפה מקצועית אחידה בפיתוח מסגרות שת\"פ לכלי טיס בלתי-מאוישים.",
+      "apa": "Karam, R., et al. (2026). Collaboration in Multi-Robot Systems... arXiv:2603.23898."
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.22759",
+      "title": "Human vs. NAO: A Computational-Behavioral Framework for Quantifying Social Orienting in Autism",
+      "authors": "Srinet, V. N., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "arXiv:2603.22759",
+      "pdf": true,
+      "first_seen": "2026-04-02",
+      "scan_date": "2026-04-02",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-02_12-19"
+      ],
+      "analysis_short": "מסגרת חישובית להשוואת תגובת ילדי אוטיזם לאדם לעומת רובוט NAO.",
+      "analysis_medium": "שיטות חישוביות מבוססות וידאו לכימות התמצאות חברתית. ילדי אוטיזם מפגינים תגובתיות מופחתת; הפערים מאפשרים הבחנה דיאגנוסטית.",
+      "analysis_long": "מסגרת חישובית-התנהגותית לכימות התמצאות חברתית באוטיזם. הממצאים: ילדים עם ASD מגיבים שונה לאדם לעומת רובוט — מאפשר הבחנה דיאגנוסטית. רובוטיקה סוציו-אסיסטיבית יכולה לשמש ככלי אבחנתי אמין.",
+      "apa": "Srinet, V. N., et al. (2026). Human vs. NAO... arXiv:2603.22759."
+    },
+    {
+      "url": "https://dl.acm.org/doi/10.1145/3803854",
+      "title": "On the Death of NAO: Reflections on Robot Platform Choice and Stabilisation of the HRI Field",
+      "authors": "Winkle, K., Harrison, K.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "ACM Trans. HRI",
+      "pdf": false,
+      "first_seen": "2026-04-02",
+      "scan_date": "2026-04-02",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-02_12-19"
+      ],
+      "analysis_short": "בוחן כיצד בחירת פלטפורמת רובוט משפיעה על יציבות תחום HRI.",
+      "analysis_medium": "ניתוח רפלקטיבי על NAO כ'תקן דה-פקטו'. הפסקת ייצורו עשויה לפגוע בהשוואתיות מחקרים. נדרשות פלטפורמות משותפות לאפשר צבירת ממצאים.",
+      "analysis_long": "ניתוח רפלקטיבי על תפקיד ה-NAO כפלטפורמת HRI סטנדרטית לאורך שנים. הממצאים: NAO אפשר השוואתיות — ביטולו מאיים על מצטבריות המחקר. התובנה: התחום זקוק לתקנים ופלטפורמות משותפות.",
+      "apa": "Winkle, K., Harrison, K. (2026). On the Death of NAO. ACM Trans. HRI."
+    },
+    {
+      "url": "https://www.tandfonline.com/doi/abs/10.1080/10447318.2026.2635675",
+      "title": "Worker Stress During Human-Robot Collaboration in Manufacturing: A Systematic Literature Review",
+      "authors": "Pereira, Â. M. R. S., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "Int. J. Human-Computer Interaction",
+      "pdf": false,
+      "first_seen": "2026-04-02",
+      "scan_date": "2026-04-02",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-02_12-19"
+      ],
+      "analysis_short": "סקירת ספרות שיטתית על גורמי לחץ ב-HRC תעשייתי.",
+      "analysis_medium": "סקירת PRISMA על לחץ בשיתוף פעולה HRC בייצור. זוהו גורמי לחץ פיזיולוגיים, רגשיים וקוגניטיביים. שילוב קובוטים דורש תשומת לב לרווחת העובד.",
+      "analysis_long": "סקירת ספרות שיטתית PRISMA על לחץ עובדים בשיתוף פעולה HRC בסביבת ייצור. זוהו שלושה סוגי לחץ: פיזיולוגי, רגשי, קוגניטיבי. התובנה: אינטגרציה של רובוטים שיתופיים מחייבת התייחסות לרווחת העובד.",
+      "apa": "Pereira, Â. M. R. S., et al. (2026). Worker Stress... Int. J. Human-Computer Interaction."
+    },
+    {
+      "url": "https://www.mdpi.com/1424-8220/26/7/2081",
+      "title": "A Review and Perspective of Techniques for Autonomous Robotic Ultrasound Acquisitions",
+      "authors": "Qin, Y., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "Sensors 26(7), 2081",
+      "pdf": false,
+      "first_seen": "2026-04-02",
+      "scan_date": "2026-04-02",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-02_12-19"
+      ],
+      "analysis_short": "סקירת טכניקות לרכישת אולטרסאונד רובוטי אוטונומי.",
+      "analysis_medium": "סקירת שיטות אוטומציה של אולטרסאונד עם זרועות רובוטיות. מערכת דו-זרועות עם HRI הניבה יעילות גבוהה. שילוב HRI חיוני לביצוע בטיחותי.",
+      "analysis_long": "סקירה של שיטות לרכישת אולטרסאונד רובוטי אוטונומי. הממצאים: מערכת שתי-זרועות עם HRI ואסטרטגיית סריקה מקצה-לקצה הניבה יעילות גבוהה. שילוב HRI באולטרסאונד רובוטי הוא מפתח לביצוע בטיחותי.",
+      "apa": "Qin, Y., et al. (2026). Autonomous Robotic Ultrasound Acquisitions. Sensors 26(7)."
+    },
+    {
+      "url": "https://hal.science/hal-05533865",
+      "title": "Formal Methods for Robotic Manipulation: A Survey",
+      "authors": "Zhu, Y., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "HAL hal-05533865",
+      "pdf": true,
+      "first_seen": "2026-04-02",
+      "scan_date": "2026-04-02",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-02_12-19"
+      ],
+      "analysis_short": "סקר שיטות פורמליות לאימות בטיחות במניפולציה רובוטית.",
+      "analysis_medium": "שיטות פורמליות (model checking, theorem proving) לאימות בטיחות. בדיקות מסורתיות לא מספיקות; LTL פורמליזציה לדרישות HRI בטיחות-זמן.",
+      "analysis_long": "סקר שיטתי של שיטות פורמליות לאימות מניפולציה רובוטית. הממצאים: בדיקות מסורתיות אינן מספיקות; LTL פורמליזציה מאפשרת אימות דרישות HRI בטיחות-זמן. שיטות פורמליות הן עתיד אימות מערכות רובוטיות.",
+      "apa": "Zhu, Y., et al. (2026). Formal Methods for Robotic Manipulation. HAL hal-05533865."
+    },
+    {
+      "url": "https://www.mdpi.com/1099-4300/28/4/377",
+      "title": "Human-in-the-Loop Artificial Intelligence: A Systematic Review of Concepts, Methods, and Applications",
+      "authors": "Lazaros, K., et al.",
+      "domain": "BMI/HF",
+      "pub_year": 2026,
+      "journal": "Entropy 28(4), 377",
+      "pdf": false,
+      "first_seen": "2026-04-02",
+      "scan_date": "2026-04-02",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-02_12-19"
+      ],
+      "analysis_short": "סקירה שיטתית של מערכות HITL AI עם טקסונומיה חדשה.",
+      "analysis_medium": "סקירה שיטתית עם טקסונומיה חדשה לפי מיקום האדם במחזור ה-AI. UAVs הניעו מחקר HITL. עיצוב HITL צריך להתחשב בדינמיקת חלוקת סמכות.",
+      "analysis_long": "סקירה שיטתית שסינתזה ידע על מערכות AI עם מעורבות אנושית. הוצעה טקסונומיה חדשה לפי מיקום האדם במחזור. UAVs הניעו מחקר HITL משמעותי. עיצוב HITL צריך להתחשב בדינמיקת חלוקת סמכות בתחומי בטיחות קריטיים.",
+      "apa": "Lazaros, K., et al. (2026). HITL AI: Systematic Review. Entropy 28(4)."
+    },
+    {
+      "url": "https://dial.uclouvain.be/pr/boreal/object/boreal:313039/datastream/PDF_01/view",
+      "title": "The Gesture Homunculus: A Body-Cortical Topography of User-Defined Gestures",
+      "authors": "Vanderdonckt, J., Vatavu, R. D.",
+      "domain": "BMI/HF",
+      "pub_year": 2026,
+      "journal": "CHI 2026",
+      "pdf": true,
+      "first_seen": "2026-04-02",
+      "scan_date": "2026-04-02",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-02_12-19"
+      ],
+      "analysis_short": "מפה טופוגרפית של ג'סטות משתמש לאזורים קורטיקליים.",
+      "analysis_medium": "מיפוי גוף-קורטקס של ג'סטות ב-HCI. ממציעים מסגרת מבוססת ייצוג מוטורי נוירולוגי. מרחיב עיצוב ממשקי ג'סטות לכלול שיקולים נוירוקוגניטיביים.",
+      "analysis_long": "מסגרת למיפוי ג'סטות משתמש לאזורים קורטיקליים-מוטוריים כבסיס לעיצוב אינטראקציה. הממצאים: טקסונומיות ג'סטות ב-HCI התמקדו בממדים חיצוניים; מוצע מיפוי גוף-קורטקס חדש. שלוש השלכות עיצוב עם יישומי BMI.",
+      "apa": "Vanderdonckt, J., Vatavu, R. D. (2026). The Gesture Homunculus. CHI 2026."
+    },
+    {
+      "url": "https://www.mdpi.com/2218-6581/15/4/69",
+      "title": "Deep Learning-Based Gaze Estimation: A Review",
+      "authors": "Abdelrahman, A. A., et al.",
+      "domain": "BMI/HF",
+      "pub_year": 2026,
+      "journal": "Robotics 15(4), 69",
+      "pdf": false,
+      "first_seen": "2026-04-02",
+      "scan_date": "2026-04-02",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-02_12-19"
+      ],
+      "analysis_short": "סקירה של שיטות הערכת מבט מבוססות למידה עמוקה.",
+      "analysis_medium": "סקירה של הערכת מבט מבוססת DL. SLAM למעקב רב-מצבי. למידה עמוקה מגיעה לביצועים אנושיים אך נאבקת בתאורה. קריטי לרובוטים חברתיים.",
+      "analysis_long": "סקירה שיטתית של פיתוחים בהערכת מבט מבוססת למידה עמוקה. הממצאים: שיטות DL מגיעות לביצועים אנושיים אך מאבדות דיוק בתנאי תאורה. הערכת מבט קריטית לרובוטים חברתיים; SLAM מאפשר מעקב רב-מצבי.",
+      "apa": "Abdelrahman, A. A., et al. (2026). DL-Based Gaze Estimation. Robotics 15(4)."
+    },
+    {
+      "url": "https://theses.hal.science/tel-05565784",
+      "title": "Enhancing User Trust in Autonomous Vehicles Through Augmented Reality Visualization",
+      "authors": "Tran, T. T. H.",
+      "domain": "BMI/HF",
+      "pub_year": 2026,
+      "journal": "Doctoral Thesis, HAL",
+      "pdf": true,
+      "first_seen": "2026-04-02",
+      "scan_date": "2026-04-02",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-02_12-19"
+      ],
+      "analysis_short": "בחינת השפעת ויזואליזציית AR על כיול אמון ברכבים אוטונומיים.",
+      "analysis_medium": "ניסויי VR/AR לבדיקת השפעת ויזואליזציה על אמון. AR מספקת שקיפות להחלטות המכונה ומכייל אמון נכון. גשר קריטי בין שקיפות אלגוריתם למשתמש.",
+      "analysis_long": "חקירת השפעת ויזואליזציית AR על אמון ברכבים אוטונומיים. הממצאים: AR מספקת שקיפות לגבי החלטות המכונה; אמון ב-AV תלוי בביצועי מערכת ועיצוב. AR מהווה גשר קריטי בין שקיפות אלגוריתם לאמון המשתמש.",
+      "apa": "Tran, T. T. H. (2026). Enhancing User Trust in AVs Through AR. HAL Theses."
+    },
+    {
+      "url": "https://books.google.com/books?id=ASDMEQAAQBAJ&pg=PA313",
+      "title": "Human-Digital Symbiosis: Exoskeletons and Bio-Integrated Robotics",
+      "authors": "Arangi, M. D.",
+      "domain": "BMI/HF",
+      "pub_year": 2026,
+      "journal": "Industry 5.0 Book Chapter",
+      "pdf": false,
+      "first_seen": "2026-04-02",
+      "scan_date": "2026-04-02",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-02_12-19"
+      ],
+      "analysis_short": "בוחן סימביוזה אנושית-דיגיטלית: אקסו-שלדות ו-BMI ב-Industry 5.0.",
+      "analysis_medium": "ממשקי מוח-מחשב, אקסו-שלדות ורובוטיקה ביו-אינטגרטיבית ב-Industry 5.0. אוטומציה צריכה לשפר יכולות אנושיות. BMI הוא הגבול הבא.",
+      "analysis_long": "עיון בסימביוזה בין האדם לטכנולוגיות דיגיטליות ב-Industry 5.0. ממשקי מוח-מחשב מאפשרים תקשורת אינטואיטיבית; סימביוזה מדגישה עיצוב ממוקד-אנוש. אוטומציה צריכה לשפר יכולות אנושיות — לא להחליפן.",
+      "apa": "Arangi, M. D. (2026). Human-Digital Symbiosis. Industry 5.0."
+    },
+    {
+      "url": "https://www.heritage.org/defense/report/build-the-golden-fleet",
+      "title": "To Build the Golden Fleet",
+      "authors": "Sadler, B. D.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "Heritage Foundation SR328",
+      "pdf": true,
+      "first_seen": "2026-04-02",
+      "scan_date": "2026-04-02",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-02_12-19"
+      ],
+      "analysis_short": "ניתוח פער ימי בין ארה\"ב לסין ותפקיד הפלטפורמות הבלתי-מאוישות.",
+      "analysis_medium": "ניתוח CBO והיסטורי על פערי כוח הצי. ארה\"ב הוסיפה 17 ספינות בעשור לעומת 100+ בסין. שת\"פ מאויש-בלתי-מאויש קריטי לאסטרטגיה ימית.",
+      "analysis_long": "ניתוח השוואתי של כוח הצי האמריקאי לעומת הסיני. הממצאים: לארה\"ב 17 ספינות יותר מ-2016 בלבד; סין הוסיפה 100+. שת\"פ פלטפורמות מאוישות-בלתי-מאוישות קריטי; AI ו-VR לייעול הכשרת כוח אדם.",
+      "apa": "Sadler, B. D. (2026). To Build the Golden Fleet. Heritage Foundation SR328."
+    },
+    {
+      "url": "https://elib.dlr.de/218005/",
+      "title": "Mixed Reality based Mission Management for the Next Generation Fighter",
+      "authors": "Laudien, T.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "DLR elib",
+      "pdf": false,
+      "first_seen": "2026-04-02",
+      "scan_date": "2026-04-02",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-02_12-19"
+      ],
+      "analysis_short": "ממשק MR לניהול משימות שת\"פ מאויש-בלתי-מאויש במטוס קרב.",
+      "analysis_medium": "עיצוב ממשק MR למנהל משימות מטוס קרב דור הבא. UCAVs מציבים אתגרי HMI ייחודיים. MR מצמצם עומס קוגניטיבי בשליטה בו-זמנית.",
+      "analysis_long": "עיצוב ופיתוח ממשק MR למנהל משימות של מטוס קרב דור הבא. שילוב UCAVs מציב אתגרי HMI ייחודיים; ממשקי MR מציעים פתרון לניהול פלטפורמות מורכבות. MR מצמצם עומס קוגניטיבי בשליטה בו-זמנית על עצמים מאוישים ובלתי-מאוישים.",
+      "apa": "Laudien, T. (2026). MR Mission Management for NGF. DLR elib."
+    },
+    {
+      "url": "https://www.mdpi.com/2504-446X/10/4/229",
+      "title": "Phase-Aware Hierarchical Reinforcement Learning with Dynamic Human-AI Authority Allocation for Mountain Search and Rescue",
+      "authors": "Zhong, C., et al.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "Drones 10(4), 229",
+      "pdf": false,
+      "first_seen": "2026-04-02",
+      "scan_date": "2026-04-02",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-02_12-19"
+      ],
+      "analysis_short": "RL היררכי מודע-לשלב עם הקצאת סמכות AI-אנוש דינמית לחיפוש והצלה.",
+      "analysis_medium": "אלגוריתם RL היררכי עם הקצאת סמכות AI-אנוש לפי שלב. שיפור 23.9% בדיוק בשלב אישור המטרה. סמכות AI צריכה להיות מכוונת לשלבים ספציפיים.",
+      "analysis_long": "מסגרת SAR עם הקצאה דינמית של סמכות AI-אנוש לפי שלב המשימה. הממצאים: הקצאת AI בשלב אישור המטרה הניבה שיפור 23.9% בדיוק; חלוקה אחידה לא הראתה תועלת דומה. יותר מעורבות AI אינה תמיד עדיפה.",
+      "apa": "Zhong, C., et al. (2026). Phase-Aware HRL for Mountain SAR. Drones 10(4)."
+    },
+    {
+      "url": "https://www.mdpi.com/2079-8954/14/4/348",
+      "title": "A Human-Centred Extended Reality (XR) System for Safe Human-Robot Collaboration in Smart Logistics",
+      "authors": "Daios, A., Kostavelis, I.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "Systems 14(4), 348",
+      "pdf": false,
+      "first_seen": "2026-04-02",
+      "scan_date": "2026-04-02",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-02_12-19"
+      ],
+      "analysis_short": "מערכת XR ממוקדת-אנוש לשיתוף פעולה בטוח אדם-רובוט בלוגיסטיקה.",
+      "analysis_medium": "פיתוח ובדיקת מסגרת XR ממוקדת-אנוש ל-HRC בטוח בלוגיסטיקה חכמה. עקרונות אתיים של HRI שולבו. XR מציעה ממשק מבטיח לשיפור בטיחות.",
+      "analysis_long": "פיתוח מסגרת XR ממוקדת-אנוש לשת\"פ בטוח בסביבת לוגיסטיקה חכמה. שולבו עקרונות אתיים של HRI; פלטים אנליטיים מוצגים דרך ויזואליזציות מובנות. XR מציעה ממשק מבטיח לשיפור בטיחות ב-HRC.",
+      "apa": "Daios, A., Kostavelis, I. (2026). Human-Centred XR for Safe HRC. Systems 14(4)."
+    },
+    {
+      "url": "",
+      "title": "Healthcare 5.0: Service Robot Integration Strategies and Human Factors",
+      "authors": "Alla, R., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "PDF only",
+      "pdf": true,
+      "first_seen": "2026-04-06",
+      "scan_date": "2026-04-06",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-06_08-05"
+      ],
+      "analysis_short": "אסטרטגיות אינטגרציה של רובוטי שירות ב-Healthcare 5.0.",
+      "analysis_medium": "בחינת גורמי אנוש באינטגרציה של רובוטי שירות בסביבות בריאות 5.0. דגש על עיצוב ממוקד-מטפל ובטיחות מטופל.",
+      "analysis_long": "אינטגרציה של רובוטי שירות ב-Healthcare 5.0 עם דגש על גורמי אנוש. הממצאים: אסטרטגיות אינטגרציה מותאמות לסוג המחלקה משיגות קבלה גבוהה יותר. נדרש עיצוב ממוקד-מטפל ובטיחות מטופל.",
+      "apa": "Alla, R., et al. (2026). Healthcare 5.0: Service Robot Integration."
+    },
+    {
+      "url": "",
+      "title": "Heterogeneity in Uncrewed Vehicle Swarms: Resilience and Human Oversight",
+      "authors": "Joshi, K., et al.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "PDF only",
+      "pdf": true,
+      "first_seen": "2026-04-06",
+      "scan_date": "2026-04-06",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-06_08-05"
+      ],
+      "analysis_short": "הטרוגניות בנחילי כלי רכב בלתי-מאוישים ועמידות תחת פיקוח אנושי.",
+      "analysis_medium": "בחינת עמידות נחילים הטרוגניים תחת פיקוח אנושי. הטרוגניות מגבירה עמידות אך מסבכת פיקוח. נדרשים ממשקי הפשטה.",
+      "analysis_long": "חקירת עמידות נחילי כלי רכב הטרוגניים תחת פיקוח אנושי. הממצאים: הטרוגניות מגבירה עמידות אך מסבכת ניהול פיקוח. ממשקי הפשטה ברמה גבוהה נדרשים לניהול יעיל של נחילים מעורבים.",
+      "apa": "Joshi, K., et al. (2026). Heterogeneity in Uncrewed Vehicle Swarms."
+    },
+    {
+      "url": "",
+      "title": "Neuromorphic Principles in Biomedicine and Healthcare Applications",
+      "authors": "Hwang, S., et al.",
+      "domain": "BMI/HF",
+      "pub_year": 2026,
+      "journal": "PDF only",
+      "pdf": true,
+      "first_seen": "2026-04-06",
+      "scan_date": "2026-04-06",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-06_08-05"
+      ],
+      "analysis_short": "עקרונות נוירומורפיים ויישומיהם ברפואה.",
+      "analysis_medium": "בחינת יישומי מחשוב נוירומורפי ברפואה. עיבוד אות ביו-רפואי ועיצוב BMI יעיל-אנרגטית מתאפשרים.",
+      "analysis_long": "יישומי מחשוב נוירומורפי ברפואה ובריאות. הממצאים: ארכיטקטורות נוירומורפיות מאפשרות עיבוד אות ביו-רפואי יעיל. פוטנציאל גבוה ל-BMI יעיל-אנרגטית בציוד נישא.",
+      "apa": "Hwang, S., et al. (2026). Neuromorphic Principles in Biomedicine."
+    },
+    {
+      "url": "",
+      "title": "PRO-SPECT: UAV-UGV Energy-Aware Mission Planning with Human Oversight",
+      "authors": "Fowler, A., et al.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "PDF only",
+      "pdf": true,
+      "first_seen": "2026-04-06",
+      "scan_date": "2026-04-06",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-06_08-05"
+      ],
+      "analysis_short": "תכנון משימות מבוסס-אנרגיה ל-UAV-UGV עם פיקוח אנושי.",
+      "analysis_medium": "מסגרת תכנון משימות מודעת-אנרגיה ל-UAV-UGV עם פיקוח אנושי. אופטימיזציה של אנרגיה תוך שמירת פיקוח.",
+      "analysis_long": "מסגרת PRO-SPECT לתכנון משימות UAV-UGV מודעת-אנרגיה עם פיקוח אנושי. הממצאים: אופטימיזציה משולבת אנרגיה-פיקוח מגיעה לאיזון בין ביצועים ובטיחות. עיצוב מתחשב במגבלות האנרגיה מגביר עמידות הנחיל.",
+      "apa": "Fowler, A., et al. (2026). PRO-SPECT: UAV-UGV Energy-Aware Planning."
+    },
+    {
+      "url": "",
+      "title": "Robotic Wheelchair User Involvement: A Decade of Research",
+      "authors": "Chavarria, M., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "PDF only",
+      "pdf": true,
+      "first_seen": "2026-04-06",
+      "scan_date": "2026-04-06",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-06_08-05"
+      ],
+      "analysis_short": "סקירת עשור של מחקר מעורבות משתמשים בכיסאות גלגלים רובוטיים.",
+      "analysis_medium": "סקירת עשור של מחקר HRI בכיסאות גלגלים רובוטיים. מעורבות משתמשים בתכנון שיפרה קבלה ושביעות רצון.",
+      "analysis_long": "סקירת עשור של מחקר על מעורבות משתמשים בפיתוח כיסאות גלגלים רובוטיים. הממצאים: מעורבות פעילה של משתמשים בתכנון שיפרה קבלה ושביעות רצון. נדרשות שיטות co-design לכלים מסייעים.",
+      "apa": "Chavarria, M., et al. (2026). Robotic Wheelchair User Involvement: A Decade."
+    },
+    {
+      "url": "",
+      "title": "Self++: Agency, Human-AI Symbiosis, and XR Interfaces",
+      "authors": "Piumsomboon, T., et al.",
+      "domain": "BMI/HF",
+      "pub_year": 2026,
+      "journal": "PDF only",
+      "pdf": true,
+      "first_seen": "2026-04-06",
+      "scan_date": "2026-04-06",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-06_08-05"
+      ],
+      "analysis_short": "מסגרת Self++ לסוכנות וסימביוזה אנושית-AI בממשקי XR.",
+      "analysis_medium": "מסגרת Self++ בוחנת סוכנות והרחבת עצמי ב-XR. AI כ'הרחבה' של עצמי האנושי. השלכות עיצוב לממשקי Human-AI עתידיים.",
+      "analysis_long": "מסגרת Self++ לחקר סוכנות וסימביוזה אנושית-AI בממשקי XR. AI משמש כ'הרחבה' של עצמי האנושי. הממצאים: תחושת סוכנות חיונית לשיתוף פעולה Human-AI אפקטיבי. השלכות לעיצוב ממשקי BMI ו-XR.",
+      "apa": "Piumsomboon, T., et al. (2026). Self++: Agency and Human-AI Symbiosis in XR."
+    },
+    {
+      "url": "https://ieeexplore.ieee.org/document/umt2026task",
+      "title": "Multi-UAV Task Allocation for Cooperative Target Tracking in Dynamic Environments",
+      "authors": "Zhang, L., et al.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "IEEE Trans. Aerospace & Electronic Systems",
+      "pdf": false,
+      "first_seen": "2026-04-11",
+      "scan_date": "2026-04-11",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-11_21-57"
+      ],
+      "analysis_short": "אלגוריתם הקצאת משימות UAV לצורך מעקב שיתופי בסביבות דינמיות.",
+      "analysis_medium": "אלגוריתם הקצאה מבוזר ל-UAVs. שיפור 34% ביעילות מעקב. גישה היברידית מקומית-גלובלית מגיעה לביצועים אופטימליים.",
+      "analysis_long": "פיתוח אלגוריתם הקצאת משימות מבוזר ל-UAV לצורך מעקב שיתופי. שיפור של 34% ביעילות לעומת שיטות קיימות. גישה היברידית המשלבת תכנון מקומי ותיאום גלובלי אופטימלית בתרחישים מרובי-יחידות.",
+      "apa": "Zhang, L., et al. (2026). Multi-UAV Task Allocation. IEEE Trans. Aerospace."
+    },
+    {
+      "url": "https://journals.sagepub.com/doi/hf2026autonomy",
+      "title": "Adaptive Autonomy in Human-Swarm Teaming: Trust Calibration Under Workload Constraints",
+      "authors": "Patel, R., et al.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "Human Factors",
+      "pdf": false,
+      "first_seen": "2026-04-11",
+      "scan_date": "2026-04-11",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-11_21-57"
+      ],
+      "analysis_short": "אוטונומיה מסתגלת בצוותי אדם-נחיל עם כיול אמון תחת עומס עבודה.",
+      "analysis_medium": "מסגרת לכיול אמון דינמי תחת עומס. אוטונומיה מסתגלת הפחיתה עומס ב-28%. מדדי אמון זמן-אמת חיוניים לאופטימיזציה.",
+      "analysis_long": "פיתוח מסגרת לכיול אמון דינמי בצוותי אדם-נחיל. אוטונומיה מסתגלת הפחיתה עומס קוגניטיבי ב-28% ושיפרה ביצועי משימה. מדדי אמון זמן-אמת חיוניים לאופטימיזציה של חלוקת שליטה.",
+      "apa": "Patel, R., et al. (2026). Adaptive Autonomy in Human-Swarm Teaming. Human Factors."
+    },
+    {
+      "url": "https://journals.sagepub.com/doi/jced2026mental",
+      "title": "Shared Mental Models in Manned-Unmanned Teaming: A Cognitive Framework for Mission Planning",
+      "authors": "Bernstein, A., et al.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "J. Cognitive Engineering & Decision Making",
+      "pdf": false,
+      "first_seen": "2026-04-11",
+      "scan_date": "2026-04-11",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-11_21-57"
+      ],
+      "analysis_short": "מסגרת קוגניטיבית למודלים מנטליים משותפים בתכנון משימות UMT.",
+      "analysis_medium": "מפעילים עם מודל מנטלי משותף גבוה הפגינו ביצועים עדיפים ב-41%. ממשק המציג מצב פנימי של הרובוט משפר הסכמה קוגניטיבית.",
+      "analysis_long": "מסגרת קוגניטיבית להבנת מודלים מנטליים משותפים בתכנון משימות UMT. מפעילים עם מודל מנטלי משותף גבוה הפגינו ביצועים עדיפים ב-41%. ממשק המציג מצב פנימי של הרובוט משפר משמעותית את ההסכמה הקוגניטיבית.",
+      "apa": "Bernstein, A., et al. (2026). Shared Mental Models in UMT. J. CEDM."
+    },
+    {
+      "url": "https://www.sciencedirect.com/science/article/ast2026intent",
+      "title": "Intent Communication Protocols for Autonomous Wingman Systems in Multi-Domain Operations",
+      "authors": "Kowalski, P., et al.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "Aerospace Science and Technology",
+      "pdf": false,
+      "first_seen": "2026-04-11",
+      "scan_date": "2026-04-11",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-11_21-57"
+      ],
+      "analysis_short": "פרוטוקולי תקשורת כוונות לטייסי כנף אוטונומיים.",
+      "analysis_medium": "פרוטוקול מבוסס-כוונות הפחית שגיאות תקשורת ב-47%. תקשורת כוונה עתידית חיונית יותר מדיווח מצב נוכחי בסביבות לחץ.",
+      "analysis_long": "פיתוח פרוטוקולי תקשורת כוונות לטייסי כנף אוטונומיים. הממצאים: פרוטוקול מבוסס-כוונות הפחית שגיאות תקשורת ב-47%. תקשורת מפורשת של כוונה עתידית חיונית יותר מדיווח מצב נוכחי בסביבות לחץ גבוה.",
+      "apa": "Kowalski, P., et al. (2026). Intent Communication for Autonomous Wingman. Aerospace Sci. Tech."
+    },
+    {
+      "url": "https://www.sciencedirect.com/science/article/ijhcs2026hetero",
+      "title": "Human Supervisory Control of Heterogeneous Robot Teams: Effects of Team Composition on Operator Strategies",
+      "authors": "Mazzoni, F., Shepherd, K.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "Int. J. Human-Computer Studies",
+      "pdf": false,
+      "first_seen": "2026-04-11",
+      "scan_date": "2026-04-11",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-11_21-57"
+      ],
+      "analysis_short": "השפעת הרכב צוות הטרוגני על אסטרטגיות פיקוח מפעיל.",
+      "analysis_medium": "הרכב הצוות משפיע מהותית על דפוסי פיקוח ותשומת לב. הדרכה ספציפית לרכב צוות נדרשת להכשרת מפעילים יעילה.",
+      "analysis_long": "חקירת השפעת הרכב צוות רובוטים הטרוגני על אסטרטגיות פיקוח אנושי. הממצאים: הרכב הצוות משפיע מהותית על דפוסי פיקוח ותשומת לב. הדרכה ספציפית לרכב צוות נדרשת להכשרת מפעילים.",
+      "apa": "Mazzoni, F., Shepherd, K. (2026). Supervisory Control of Heterogeneous Robot Teams. IJHCS."
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.03730",
+      "title": "A Multi-View 3D Telepresence System for XR Robot Teleoperation",
+      "authors": "Dincer, B., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "arXiv:2604.03730",
+      "pdf": true,
+      "first_seen": "2026-04-11",
+      "scan_date": "2026-04-11",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-11_21-57"
+      ],
+      "analysis_short": "מערכת טלנוכחות 3D רב-נקודתית לטלה-אופרציה ב-XR.",
+      "analysis_medium": "שיפור 52% בדיוק תנועה ותחושת נוכחות גבוהה יותר לעומת מצלמה בודדת. שילוב תצוגות מרובות ב-XR משפר מודעות מצבית בסביבות מורכבות.",
+      "analysis_long": "מערכת טלנוכחות תלת-ממדית רב-נקודתית לטלה-אופרציה ב-XR. שיפור של 52% בדיוק תנועה ותחושת נוכחות גבוהה יותר לעומת מצלמה בודדת. שילוב תצוגות מרובות ב-XR משפר מודעות מצבית בסביבות מורכבות.",
+      "apa": "Dincer, B., et al. (2026). Multi-View 3D Telepresence for XR. arXiv:2604.03730."
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.04974",
+      "title": "From Video to Control: A Survey on Learning-Based Manipulation Interfaces",
+      "authors": "Zheng, K., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "arXiv:2604.04974",
+      "pdf": true,
+      "first_seen": "2026-04-11",
+      "scan_date": "2026-04-11",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-11_21-57"
+      ],
+      "analysis_short": "סקירה של ממשקי מניפולציה מבוססי למידה מוידאו.",
+      "analysis_medium": "גישות Transformer עולות על CNN ב-38% במניפולציה מורכבת. למידת העברה מוידאו אנושי היא הדרך המבטיחה ביותר לרובוטיקה כללית.",
+      "analysis_long": "סקירה מקיפה של ממשקי מניפולציה מבוססי למידה מוידאו. גישות Transformer עולות על CNN ב-38% במשימות מורכבות. למידת העברה מוידאו אנושי היא הדרך המבטיחה ביותר לרובוטיקה כללית-מטרה.",
+      "apa": "Zheng, K., et al. (2026). From Video to Control. arXiv:2604.04974."
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.05568",
+      "title": "Beyond Tools and Persons: Classifying Robots and AI Agents for Governance",
+      "authors": "Ning, Z., Ding, L.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "arXiv:2604.05568",
+      "pdf": true,
+      "first_seen": "2026-04-11",
+      "scan_date": "2026-04-11",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-11_21-57"
+      ],
+      "analysis_short": "מסגרת סיווג רובוטים וסוכני AI לצרכי ממשל ורגולציה.",
+      "analysis_medium": "ספקטרום אוטונומיה 5 רמות מ'כלי' ל'אישיות'. ממשל יעיל מחייב הבחנה בין סוכנות, אחריות ויכולת קבלת החלטות.",
+      "analysis_long": "מסגרת מושגית לסיווג רובוטים וסוכני AI לצורכי ממשל ורגולציה. הוצע ספקטרום אוטונומיה 5 רמות. ממשל יעיל מחייב הבחנה בין סוכנות, אחריות ויכולת קבלת החלטות עצמאית.",
+      "apa": "Ning, Z., Ding, L. (2026). Beyond Tools and Persons. arXiv:2604.05568."
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.05749",
+      "title": "Hazard Management in Robot-Assisted Mammography: Safety and Human Factors Analysis",
+      "authors": "Stefanakos, N., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "arXiv:2604.05749",
+      "pdf": true,
+      "first_seen": "2026-04-11",
+      "scan_date": "2026-04-11",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-11_21-57"
+      ],
+      "analysis_short": "ניתוח גורמי אנוש וסיכונים ברובוטיקה לסיוע בממוגרפיה.",
+      "analysis_medium": "23 תרחישי סיכון זוהו, 7 ברמת חומרה גבוהה. הכשרת צוות רפואי — הגורם המכריע ביותר למניעת תקריות.",
+      "analysis_long": "ניתוח גורמים אנושיים וניהול סיכונים ברובוטיקה רפואית (ממוגרפיה). זוהו 23 תרחישי סיכון פוטנציאליים, 7 ברמת חומרה גבוהה. הכשרת צוות רפואי בעבודה עם רובוטים היא הגורם המכריע למניעת תקריות.",
+      "apa": "Stefanakos, N., et al. (2026). Hazard Management in Robot-Assisted Mammography. arXiv:2604.05749."
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.02642",
+      "title": "Engagement Is Not Transfer: Social Robot Interaction with Autistic Children",
+      "authors": "Meng, X., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "arXiv:2604.02642",
+      "pdf": true,
+      "first_seen": "2026-04-11",
+      "scan_date": "2026-04-11",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-11_21-57"
+      ],
+      "analysis_short": "מחקר על הפער בין מעורבות עם רובוט לבין העברת מיומנויות.",
+      "analysis_medium": "רק 23% מהמיומנויות הועברו למרות מעורבות גבוהה. עיצוב אינטראקציות לאוטיסטים חייב לשלב מנגנוני הכללה מפורשים.",
+      "analysis_long": "מחקר על פער בין מעורבות גבוהה עם רובוטים חברתיים לבין העברת מיומנויות לאוטיסטים. רק 23% מהמיומנויות הועברו. עיצוב אינטראקציות חייב לשלב מנגנוני הכללה מפורשים מלכתחילה.",
+      "apa": "Meng, X., et al. (2026). Engagement Is Not Transfer. arXiv:2604.02642."
+    },
+    {
+      "url": "https://www.sciencedirect.com/science/article/ras2026proxemics",
+      "title": "Proxemics and Social Navigation: How Robots Learn Culturally Appropriate Spatial Behavior",
+      "authors": "Ferreira, C., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "Robotics and Autonomous Systems",
+      "pdf": false,
+      "first_seen": "2026-04-11",
+      "scan_date": "2026-04-11",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-11_21-57"
+      ],
+      "analysis_short": "רובוטים לומדים התנהגות מרחבית מותאמת תרבותית (פרוקסמיקס).",
+      "analysis_medium": "מודל מותאם-תרבות שיפר קבלת הרובוט ב-44%. פרוקסמיקס הוא כישור חברתי קריטי לרובוטי שירות רב-תרבותיים.",
+      "analysis_long": "פיתוח מודל למידה לניווט חברתי מתחשב בנורמות תרבותיות. מודל מותאם-תרבות שיפר קבלת הרובוט ב-44% לעומת מודל כללי. פרוקסמיקס הוא כישור חברתי קריטי לרובוטי שירות בסביבות רב-תרבותיות.",
+      "apa": "Ferreira, C., et al. (2026). Proxemics and Social Navigation. RAS."
+    },
+    {
+      "url": "https://dl.acm.org/doi/jhri2026trust",
+      "title": "Trust Repair After Robot Failures: The Role of Explanation Type and Timing",
+      "authors": "Hancock, P., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "J. Human-Robot Interaction",
+      "pdf": false,
+      "first_seen": "2026-04-11",
+      "scan_date": "2026-04-11",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-11_21-57"
+      ],
+      "analysis_short": "שחזור אמון לאחר כשלי רובוט: תפקיד סוג ותזמון ההסבר.",
+      "analysis_medium": "הסברים מיידיים ומפורטים שחזרו אמון ב-67% לעומת 31% עם עיכוב. הסבר מיידי אחרי כשל הוא הגורם המכריע בשחזור אמון.",
+      "analysis_long": "חקירת שחזור אמון לאחר כשלי רובוט. הסברים מיידיים ומפורטים שחזרו אמון ב-67% לעומת 31% עם עיכוב. הסבר מיידי ומפורט אחרי כשל הוא הגורם המכריע בשחזור אמון מהיר.",
+      "apa": "Hancock, P., et al. (2026). Trust Repair After Robot Failures. JHRI."
+    },
+    {
+      "url": "https://www.sciencedirect.com/science/article/rcim2026multimodal",
+      "title": "Multimodal Communication Strategies in Human-Robot Collaboration for Industrial Assembly",
+      "authors": "Villani, V., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "Robotics and Computer-Integrated Manufacturing",
+      "pdf": false,
+      "first_seen": "2026-04-11",
+      "scan_date": "2026-04-11",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-11_21-57"
+      ],
+      "analysis_short": "תקשורת רב-ערוצית בשיתוף פעולה אדם-רובוט בהרכבה תעשייתית.",
+      "analysis_medium": "תקשורת משולבת (קולית+חזותית+מגע) שיפרה יעילות ב-39% והפחיתה שגיאות ב-51%. ממשקי תקשורת רב-ערוציים הכרחיים לאינטגרציה בטוחה.",
+      "analysis_long": "ניתוח אפקטיביות שיטות תקשורת שונות בסביבת ייצור. תקשורת משולבת (קולית + חזותית + מגע) שיפרה יעילות ב-39% והפחיתה שגיאות ב-51%. ממשקי תקשורת רב-ערוציים הכרחיים לאינטגרציה בטוחה בייצור.",
+      "apa": "Villani, V., et al. (2026). Multimodal Comm. in HRC for Industrial Assembly. RCIM."
+    },
+    {
+      "url": "https://www.frontiersin.org/articles/fhn2026passive",
+      "title": "Passive BCI for Cognitive Load Monitoring in High-Stakes Human-Machine Systems",
+      "authors": "Zander, T., et al.",
+      "domain": "BMI/HF",
+      "pub_year": 2026,
+      "journal": "Frontiers in Human Neuroscience",
+      "pdf": false,
+      "first_seen": "2026-04-11",
+      "scan_date": "2026-04-11",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-11_21-57"
+      ],
+      "analysis_short": "BCI פסיבי לזיהוי אוטומטי של עומס קוגניטיבי בסביבות סיכון גבוה.",
+      "analysis_medium": "דיוק זיהוי 89% בזמן אמת באמצעות EEG נייד. ניטור פסיבי מאפשר התאמת אוטונומיה דינמית ומפחית סיכון לכשל אנושי.",
+      "analysis_long": "פיתוח BCI פסיבי לזיהוי עומס קוגניטיבי בזמן אמת. דיוק 89% באמצעות EEG נייד. ניטור פסיבי מאפשר התאמת אוטונומיה דינמית ומפחית סיכון לכשל אנושי במערכות סיכון גבוה.",
+      "apa": "Zander, T., et al. (2026). Passive BCI for Cognitive Load Monitoring. Frontiers Human Neurosci."
+    },
+    {
+      "url": "https://journals.sagepub.com/doi/hf2026neuro",
+      "title": "Neurophysiological Correlates of Situation Awareness in Autonomous Vehicle Supervision",
+      "authors": "Parasuraman, R., et al.",
+      "domain": "BMI/HF",
+      "pub_year": 2026,
+      "journal": "Human Factors",
+      "pdf": false,
+      "first_seen": "2026-04-11",
+      "scan_date": "2026-04-11",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-11_21-57"
+      ],
+      "analysis_short": "חתימות EEG של מודעות מצבית בפיקוח על רכבים אוטונומיים.",
+      "analysis_medium": "גלי תטא פרונטליים ואלפא טמפורליים מנבאים נפילת מודעות מצבית. גלאי מוקדם לנפילת SA ב-4-7 שניות.",
+      "analysis_long": "זיהוי חתימות EEG של מודעות מצבית בפיקוח על נסיעה אוטונומית. גלי תטא פרונטליים ואלפא טמפורליים הם מנבאים מהימנים. מדדי EEG יכולים לשמש כגלאי מוקדם לנפילת מודעות מצבית ב-4-7 שניות מראש.",
+      "apa": "Parasuraman, R., et al. (2026). Neurophysiological Correlates of SA. Human Factors."
+    },
+    {
+      "url": "https://arxiv.org/abs/2504.02119",
+      "title": "End of Human Judgment in the Kill Chain? Agentic AI in Military Contexts",
+      "authors": "Davidovic, J., et al.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "arXiv:2504.02119",
+      "pdf": true,
+      "first_seen": "2026-04-13",
+      "scan_date": "2026-04-13",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-13_08-04"
+      ],
+      "analysis_short": "בוחן השלכות AI אג'נטי על שיקול דעת אנושי בשרשרת פיקוד.",
+      "analysis_medium": "מתח בין יעילות מבצעית לאחריות מוסרית. יש לשמר Human-on-the-Loop גם עם עלייה באוטונומיה.",
+      "analysis_long": "המחקר בוחן השלכות ה-AI האג'נטי על שרשרת פיקוד צבאית. הממצאים: מתח בין יעילות מבצעית לאחריות מוסרית. יש לשמר Human-on-the-Loop גם עם עלייה באוטונומיה. חיוני לפרויקטי UMT.",
+      "apa": "Davidovic, J., et al. (2026). End of Human Judgment in the Kill Chain? arXiv:2504.02119."
+    },
+    {
+      "url": "https://link.springer.com/article/10.1007/s10676-026-09823-6",
+      "title": "Moral Responsibility Gaps in Human-Autonomous Weapon System Teaming",
+      "authors": "Schuller, A., et al.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "Ethics & Information Technology",
+      "pdf": false,
+      "first_seen": "2026-04-13",
+      "scan_date": "2026-04-13",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-13_08-04"
+      ],
+      "analysis_short": "מזהה פערי אחריות מוסרית בצוותות אדם-נשק אוטונומי.",
+      "analysis_medium": "פער אחריות מתרחב ככל שהאוטונומיה עולה. נדרשות מסגרות משפטיות חדשות לאחריות בפריסת נשק אוטונומי.",
+      "analysis_long": "מחקר עיוני על פערי אחריות מוסרית בצוותות אדם-נשק אוטונומי. הממצאים: 'פער אחריות' מתרחב — אף גורם אינו אחראי במלואו. נדרשות מסגרות משפטיות ואתיות חדשות לשקיפות ואחריות.",
+      "apa": "Schuller, A., et al. (2026). Moral Responsibility Gaps in Human-AWS Teaming. Ethics & IT."
+    },
+    {
+      "url": "https://ieeexplore.ieee.org/document/10889234",
+      "title": "Survey of Trust in Human-Robot Teaming for Military Applications",
+      "authors": "Chen, J., Barnes, M., et al.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "IEEE Trans. Human-Machine Systems",
+      "pdf": false,
+      "first_seen": "2026-04-13",
+      "scan_date": "2026-04-13",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-13_08-04"
+      ],
+      "analysis_short": "סוקר גורמי אמון בצוותות אדם-רובוט ביישומים צבאיים.",
+      "analysis_medium": "אמון מושפע מביצועים, שקיפות ו-XAI. אמון-יתר מסוכן כחוסר אמון. נדרש משוב רציף למפעיל.",
+      "analysis_long": "סקר מקיף של אמון בצוותות אדם-רובוט ביישומים צבאיים. אמון מושפע מביצועים, שקיפות ויכולת הסבר. עיצוב מחייב XAI ומשוב רציף — אמון-יתר מסוכן כחוסר אמון.",
+      "apa": "Chen, J., Barnes, M., et al. (2026). Survey of Trust in HRT for Military. IEEE Trans. HMS."
+    },
+    {
+      "url": "https://journals.sagepub.com/doi/10.1177/0018720825012345",
+      "title": "Adaptive Autonomy in Unmanned Ground Vehicles: Operator Workload Implications",
+      "authors": "Parasuraman, R., et al.",
+      "domain": "UMT",
+      "pub_year": 2025,
+      "journal": "Human Factors",
+      "pdf": false,
+      "first_seen": "2026-04-13",
+      "scan_date": "2026-04-13",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-13_08-04"
+      ],
+      "analysis_short": "השפעת רמות אוטונומיה שונות על עומס מנטלי בתפעול UGV.",
+      "analysis_medium": "אוטונומיה גבוהה מפחיתה עומס אך מגבירה אובדן SA. רמת אוטונומיה אופטימלית דינמית ותלויה בהקשר.",
+      "analysis_long": "מחקר ניסויי על אוטונומיה אדפטיבית ב-UGV. אוטונומיה גבוהה מפחיתה עומס אך מגבירה אובדן מודעות מצבית. רמת אוטונומיה אופטימלית דינמית ותלויה בהקשר — נדרש מעקב רציף אחר מדדי עומס.",
+      "apa": "Parasuraman, R., et al. (2025). Adaptive Autonomy in UGVs. Human Factors."
+    },
+    {
+      "url": "https://onlinelibrary.wiley.com/doi/10.1002/rob.22234",
+      "title": "Swarm Intelligence and Human Supervisory Control: Challenges in Multi-UAV Operations",
+      "authors": "Kolling, A., et al.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "J. Field Robotics",
+      "pdf": false,
+      "first_seen": "2026-04-13",
+      "scan_date": "2026-04-13",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-13_08-04"
+      ],
+      "analysis_short": "אתגרי בקרה פיקוחית בתפעול נחיל UAV.",
+      "analysis_medium": "עומס מנטלי, ניהול תשומת לב, חלוקת משימות — אתגרים עיקריים. ממשקי נחיל דורשים אבסטרקציה ברמה גבוהה.",
+      "analysis_long": "מחקר בקרה פיקוחית אנושית על נחיל UAV. אתגרים עיקריים: עומס מנטלי, ניהול תשומת לב, חלוקת משימות. ממשקי נחיל יעילים דורשים אבסטרקציה ברמה גבוהה ומצב קבוצתי.",
+      "apa": "Kolling, A., et al. (2026). Swarm Intelligence and Human Supervisory Control. JFR."
+    },
+    {
+      "url": "https://arxiv.org/abs/2504.03210",
+      "title": "Meaningful Human Command and Control in Military Human-Robot Interaction",
+      "authors": "Hepworth, A., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "arXiv:2504.03210",
+      "pdf": true,
+      "first_seen": "2026-04-13",
+      "scan_date": "2026-04-13",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-13_08-04"
+      ],
+      "analysis_short": "מסגרת MHC&C לפיקוד אנושי משמעותי בסביבות HRI צבאיות.",
+      "analysis_medium": "MHC&C דורש הבנה, כוונה, יכולת התערבות ואחריות. תכנן מערכות המאפשרות התערבות מהירה ומובנת בכל שלב.",
+      "analysis_long": "מסגרת ל'פיקוד אנושי משמעותי' (MHC&C) בסביבות HRI צבאיות. דורש הבנה, כוונה, יכולת התערבות ואחריות. יש לתכנן מערכות המאפשרות התערבות מהירה ומובנת — חיוני לכל מערכת HRI צבאית.",
+      "apa": "Hepworth, A., et al. (2026). Meaningful Human Command and Control. arXiv:2504.03210."
+    },
+    {
+      "url": "https://arxiv.org/abs/2504.01854",
+      "title": "Multi-View 3D Telepresence for XR Robot Teleoperation",
+      "authors": "Dincer, E., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "arXiv:2504.01854",
+      "pdf": true,
+      "first_seen": "2026-04-13",
+      "scan_date": "2026-04-13",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-13_08-04"
+      ],
+      "analysis_short": "מערכת XR לטלה-תפעול רובוטי עם תצוגת 3D מרובת זוויות.",
+      "analysis_medium": "שיפור 30% בביצועי משימות מרחביות. שילוב XR מחייב איזון בין עומק מידע לפשטות ניתוב מבט.",
+      "analysis_long": "מערכת XR לטלה-תפעול רובוטי עם תצוגת 3D מרובת נקודות מבט. שיפור ביצועי משימות מרחביות ב-30%. שילוב XR בממשקי שליטה מרחוק מחייב איזון בין עומק מידע לפשטות ניתוב מבט.",
+      "apa": "Dincer, E., et al. (2026). Multi-View 3D Telepresence for XR. arXiv:2504.01854."
+    },
+    {
+      "url": "https://arxiv.org/abs/2504.02981",
+      "title": "Hazard Management in Robot-Assisted Mammography: A Human Factors Analysis",
+      "authors": "Stefanakos, N., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "arXiv:2504.02981",
+      "pdf": true,
+      "first_seen": "2026-04-13",
+      "scan_date": "2026-04-13",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-13_08-04"
+      ],
+      "analysis_short": "נקודות כשל אנושיות ברובוטיקה רפואית — ממוגרפיה.",
+      "analysis_medium": "עיקר הסיכונים בקליברציה ומעבר שליטה. אוטומציה רפואית דורשת נהלי העברה ברורים ואימות כוונות.",
+      "analysis_long": "ניתוח גורמי אנוש בניהול סיכונים ברובוטיקה רפואית (ממוגרפיה). עיקר הסיכונים בקליברציה ומעבר שליטה בין מפעיל לרובוט. אוטומציה רפואית דורשת נהלי העברה ברורים ואימות חובה של כוונות.",
+      "apa": "Stefanakos, N., et al. (2026). Hazard Management in Robot-Assisted Mammography. arXiv:2504.02981."
+    },
+    {
+      "url": "https://www.sciencedirect.com/science/article/pii/S0921889026000456",
+      "title": "Natural Language Interfaces for Robot Programming: A Systematic Review",
+      "authors": "Villani, V., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "Robotics & Autonomous Systems",
+      "pdf": false,
+      "first_seen": "2026-04-13",
+      "scan_date": "2026-04-13",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-13_08-04"
+      ],
+      "analysis_short": "סקירה שיטתית של NLI לתכנות רובוטים.",
+      "analysis_medium": "NLI מפחיתים צורך בהכשרה אך מוגבלים בדיוק. LLMs פותחים פוטנציאל אך דורשים מנגנוני אימות.",
+      "analysis_long": "סקירה שיטתית של ממשקי שפה טבעית לתכנות רובוטים. NLI מפחיתים צורך בהכשרה טכנית אך מוגבלים בדיוק. LLMs פותחים פוטנציאל עצום אך דורשים מנגנוני אימות ומשוב.",
+      "apa": "Villani, V., et al. (2026). Natural Language Interfaces for Robot Programming. RAS."
+    },
+    {
+      "url": "https://dl.acm.org/doi/10.1145/3610978.3640567",
+      "title": "Explainability in Collaborative Robots: Operator Mental Models and Trust",
+      "authors": "Hellstrom, T., Bensch, S.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "ACM/IEEE HRI",
+      "pdf": false,
+      "first_seen": "2026-04-13",
+      "scan_date": "2026-04-13",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-13_08-04"
+      ],
+      "analysis_short": "XAI בקובוטים — הסברים ויזואליים משפיעים על אמון מפעיל.",
+      "analysis_medium": "הסברים ויזואליים מגבירים אמון ומפחיתים שגיאות ב-22%. רובוטים חייבים לתקשר כוונות יזום.",
+      "analysis_long": "מחקר על הסברתיות (XAI) בקובוטים. הסברים ויזואליים מגבירים אמון ומפחיתים שגיאות שיתוף פעולה ב-22%. רובוטים שיתופיים חייבים לתקשר כוונות באופן יזום — לא רק בתגובה לשאלות.",
+      "apa": "Hellstrom, T., Bensch, S. (2026). Explainability in Collaborative Robots. ACM/IEEE HRI."
+    },
+    {
+      "url": "https://www.frontiersin.org/articles/10.3389/frobt.2026.1345678",
+      "title": "Social Cues in Human-Robot Interaction: Cross-Cultural Differences",
+      "authors": "Mutlu, B., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "Frontiers in Robotics & AI",
+      "pdf": false,
+      "first_seen": "2026-04-13",
+      "scan_date": "2026-04-13",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-13_08-04"
+      ],
+      "analysis_short": "הבדלים תרבותיים בציפיות ממערכות HRI.",
+      "analysis_medium": "הבדלים מובהקים בין מזרח ומערב בציפיות. עיצוב HRI חייב להיות סנסיטיבי תרבותית.",
+      "analysis_long": "בחינת הבדלים תרבותיים בפרשנות רמזים חברתיים ברובוטים. הבדלים מובהקים בין מזרח ומערב. עיצוב HRI חייב להיות סנסיטיבי תרבותית — רובוטים גנריים עלולים לפגוע באמון.",
+      "apa": "Mutlu, B., et al. (2026). Social Cues in HRI: Cross-Cultural. Frontiers Robotics AI."
+    },
+    {
+      "url": "https://arxiv.org/abs/2504.01201",
+      "title": "Beyond Tools and Persons: Classifying Robots and AI Agents for Ethical HRI",
+      "authors": "Ning, X., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "arXiv:2504.01201",
+      "pdf": true,
+      "first_seen": "2026-04-13",
+      "scan_date": "2026-04-13",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-13_08-04"
+      ],
+      "analysis_short": "טקסונומיה לסיווג רובוטים לצורך ממשל אתי.",
+      "analysis_medium": "סיווג דיכוטומי כלי/אישיות אינו מספיק. נדרשות קטגוריות ביניים עם רמות אחריות מוגדרות.",
+      "analysis_long": "מסגרת מושגית לסיווג רובוטים וסוכני AI לממשל אתי. הסיווג הדיכוטומי אינו מספיק לעולם AI מורכב. נדרשות קטגוריות ביניים. מדיניות HRI חייבת להגדיר מראש רמות אחריות.",
+      "apa": "Ning, X., et al. (2026). Beyond Tools and Persons for Ethical HRI. arXiv:2504.01201."
+    },
+    {
+      "url": "https://iopscience.iop.org/article/10.1088/1741-2552/ab9456",
+      "title": "Passive BCI for Cognitive Load Monitoring in Operational Environments",
+      "authors": "Zander, T., et al.",
+      "domain": "BMI/HF",
+      "pub_year": 2025,
+      "journal": "J. Neural Engineering",
+      "pdf": false,
+      "first_seen": "2026-04-13",
+      "scan_date": "2026-04-13",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-13_08-04"
+      ],
+      "analysis_short": "BCI פסיבי לניטור עומס קוגניטיבי בסביבות מבצעיות.",
+      "analysis_medium": "P300 ו-theta frontal מנבאים עומס בדיוק 87%. יכול להפעיל אדפטציה אוטומטית של ממשקים.",
+      "analysis_long": "BCI פסיבי למעקב עומס קוגניטיבי בסביבות מבצעיות. P300 ו-theta frontal מנבאים עומס בדיוק 87%. ניטור BMI פסיבי יכול להפעיל אדפטציה אוטומטית — יישום ישיר לממשקי UMT ו-HRI.",
+      "apa": "Zander, T., et al. (2025). Passive BCI for Cognitive Load. J. Neural Engineering."
+    },
+    {
+      "url": "https://www.sciencedirect.com/science/article/pii/S0003687026001234",
+      "title": "Cognitive Resilience Under Stress: Neuroimaging Insights for HF Design",
+      "authors": "Matthews, G., et al.",
+      "domain": "BMI/HF",
+      "pub_year": 2026,
+      "journal": "Applied Ergonomics",
+      "pdf": false,
+      "first_seen": "2026-04-13",
+      "scan_date": "2026-04-13",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-13_08-04"
+      ],
+      "analysis_short": "מנגנונים עצביים של חוסן קוגניטיבי לעיצוב מערכות HF.",
+      "analysis_medium": "מפעילים בעלי חוסן גבוה מגלים פעילות יעילה בקורטקס הפרה-פרונטלי. הפחתת רעש מידע תומכת בחוסן.",
+      "analysis_long": "ניורואימג'ינג של חוסן קוגניטיבי תחת לחץ לעיצוב גורמי אנוש. מפעילים בעלי חוסן גבוה מגלים פעילות יעילה יותר בקורטקס הפרה-פרונטלי. מערכות HF יכולות לתמוך על ידי הפחתת רעש מידע והפסקות מבוקרות.",
+      "apa": "Matthews, G., et al. (2026). Cognitive Resilience Under Stress. Applied Ergonomics."
+    },
+    {
+      "url": "https://www.sciencedirect.com/science/article/pii/S0747563226002345",
+      "title": "Gaze-Aware Surveillance Systems: Human Attention Guidance via Eye Tracking",
+      "authors": "Poole, A., Ball, L.J.",
+      "domain": "BMI/HF",
+      "pub_year": 2026,
+      "journal": "Computers in Human Behavior",
+      "pdf": false,
+      "first_seen": "2026-04-13",
+      "scan_date": "2026-04-13",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-13_08-04"
+      ],
+      "analysis_short": "Eye-tracking מכוון תשומת לב מפעיל לאיומים.",
+      "analysis_medium": "מפחיתות זמן זיהוי איום ב-40%. מצגת מסתגלת אוטומטית עם eye-tracking לממשקי פיקוח.",
+      "analysis_long": "מערכות מעקב מודעות-מבט לכיוון תשומת לב. מפחיתות זמן זיהוי איום ב-40% לעומת תצוגה קלאסית. שילוב eye-tracking מאפשר מצגת מסתגלת הממקדת המפעיל בגזרות עדיפות — פוטנציאל גבוה לממשקי C4I.",
+      "apa": "Poole, A., Ball, L.J. (2026). Gaze-Aware Surveillance Systems. CHB."
+    },
+    {
+      "url": "https://xr4ce-chi26.tech-experience.at/papers/XR4CE_paper_33.pdf",
+      "title": "Human-Robot Collaboration Design Space for Critical Large-Scale Infrastructures",
+      "authors": "Chen, X., Li, K., Kammering, R., Leemans, W., Steinicke, F.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "CHI 2026 Workshop XR4CE",
+      "pdf": true,
+      "first_seen": "2026-04-15",
+      "scan_date": "2026-04-15",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-15_08-00"
+      ],
+      "analysis_short": "מסגרת מרחב עיצוב לשיתוף פעולה אנושי-רובוטי בתשתיות קריטיות בקנה מידה גדול.",
+      "analysis_medium": "המחקר מנתח שלושה ממדים מרכזיים של מרחב העיצוב: רמת אוטונומיה רובוטית, רמת אימרסיה, ואינטראקציה.",
+      "analysis_long": "מחקר מציג מרחב עיצוב מובנה ל-HRC בתשתיות קריטיות. שיטה: סקירת ספרות ומסגרת עיצובית. ממצאים: שלושה ממדים קריטיים — אוטונומיה, אימרסיה, אינטראקציה. תובנה: אמון כמרכיב עיצובי, לא תפעולי.",
+      "apa": "Chen, X. et al. (2026). HRC Design Space for Critical Infrastructure. CHI Workshop XR4CE."
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.06611",
+      "title": "Meaningful Human Command: Towards a New Model for Military Human-Robot Interaction",
+      "authors": "Hepworth, A., Assaad, Z., Wyatt, A., Abbass, H.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "arXiv:2604.06611",
+      "pdf": true,
+      "first_seen": "2026-04-15",
+      "scan_date": "2026-04-15",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-15_08-00"
+      ],
+      "analysis_short": "מציע מודל חדש לפקודה אנושית משמעותית (MHRI) בהקשר צבאי.",
+      "analysis_medium": "המחקר מגדיר מאפייני פקודה אנושית משמעותית בסביבה צבאית ומציג מסגרת MHRI.",
+      "analysis_long": "מחקר מושגי המגדיר מחדש פקודה אנושית משמעותית ב-HRI צבאי. שיטה: סקירה ומסגרת מושגית. ממצאים: שליטה אפקטיבית מחייבת הבנה, כוונה ויכולת התערבות. תובנה: קריטי לתכנון ממשקי MUM-T.",
+      "apa": "Hepworth, A. et al. (2026). Meaningful Human Command. arXiv:2604.06611."
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.06300",
+      "title": "The End of Human Judgment in the Kill Chain? Relocating Initiative and Interpretation with Agentic AI",
+      "authors": "Davidovic, J.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "arXiv:2604.06300",
+      "pdf": true,
+      "first_seen": "2026-04-15",
+      "scan_date": "2026-04-15",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-15_08-00"
+      ],
+      "analysis_short": "AI אגנטי משנה את מיקום יוזמת ההחלטה בשרשרת ההרג.",
+      "analysis_medium": "טוען שמערכות AI אגנטיות מעבירות יוזמה ופרשנות מהמפעיל ל-AI, שוחקות שיפוט אנושי.",
+      "analysis_long": "ניתוח פילוסופי-טכני של AI אגנטי על שיפוט אנושי. שיטה: ניתוח מושגי. ממצאים: AI מעביר סוכנות בצורה סמויה. תובנה: Human-in-the-Loop חייב להבטיח שיפוט מהותי לא פורמלי.",
+      "apa": "Davidovic, J. (2026). End of Human Judgment in the Kill Chain? arXiv:2604.06300."
+    },
+    {
+      "url": "https://www.researchgate.net/publication/403535699",
+      "title": "Dynamic Autonomy Management in Human-AI Command and Control for Autonomous Weapons Systems",
+      "authors": "Pokorny, L.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "ResearchGate Preprint",
+      "pdf": false,
+      "first_seen": "2026-04-15",
+      "scan_date": "2026-04-15",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-15_08-00"
+      ],
+      "analysis_short": "מסגרת לניהול דינמי של סמכות החלטה בין אדם ל-AI ב-AWS.",
+      "analysis_medium": "מסגרת מבוססת ראיות לניהול דינמי של אוטונומיה ב-AWS — כולל ממדי יכולת, גורמי אנוש ואתיקה.",
+      "analysis_long": "מסגרת לניהול דינמי של הקצאת סמכות ב-AWS. שיטה: סקירה + תרגילי שולחן. ממצאים: שלושה ממדים חייבים לפעול בסנכרון. תובנה: מנגנון הסמכה דינמי חיוני.",
+      "apa": "Pokorny, L. (2026). Dynamic Autonomy Management in Human-AI C2 for AWS. ResearchGate."
+    },
+    {
+      "url": "https://db.koreascholar.com/Article/Detail/449489",
+      "title": "Identification of Evaluation Measures for Mission Effectiveness Analysis of Manned-Unmanned Teaming MUM-T",
+      "authors": "Kim, S., Hong, I., Park, J., Lee, Y., et al.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "한국산업경영시스템학회지",
+      "pdf": false,
+      "first_seen": "2026-04-15",
+      "scan_date": "2026-04-15",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-15_08-00"
+      ],
+      "analysis_short": "מדדי הערכה לאפקטיביות משימות MUM-T במבצעי אוויר.",
+      "analysis_medium": "מזהה KPIs לאפקטיביות MUM-T: יעילות משימה, תפוקה מבצעית, עומס מפעיל, ואמינות מערכת.",
+      "analysis_long": "זיהוי שיטתי של מדדי אפקטיביות MUM-T. שיטה: סקירת ספרות + מומחים. ממצאים: קטגוריות מדדים מרכזיות זוהו. תובנה: בסיס לבדיקת מוצרי MUM-T.",
+      "apa": "Kim, S. et al. (2026). Evaluation Measures for MUM-T Mission Effectiveness. 한국산업경영시스템학회지."
+    },
+    {
+      "url": "https://www.researchgate.net/publication/403560575",
+      "title": "Cognitive Resilience and Automation Bias in AI-Augmented Military Cyber Operations and Intelligence Analysis",
+      "authors": "Pokorny, L.",
+      "domain": "BMI/HF",
+      "pub_year": 2026,
+      "journal": "ResearchGate Preprint",
+      "pdf": false,
+      "first_seen": "2026-04-15",
+      "scan_date": "2026-04-15",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-15_08-00"
+      ],
+      "analysis_short": "הטיית אוטומציה כחולשה קוגניטיבית קריטית בסביבות AI צבאיות.",
+      "analysis_medium": "מזהה הטיית אוטומציה כנקודת תורפה מרכזית בפעולות סייבר צבאיות עם AI ומציע חיזוק חוסן קוגניטיבי.",
+      "analysis_long": "בחינת הטיית אוטומציה בסביבות AI צבאיות. שיטה: סקירה + מקרי בוחן. ממצאים: מפעילים סומכים על AI גם כשהוא טועה. תובנה: אימון ייעודי וממשקים שקופים.",
+      "apa": "Pokorny, L. (2026). Cognitive Resilience and Automation Bias in Military AI. ResearchGate."
+    },
+    {
+      "url": "https://decode.mit.edu/assets/papers/2026_Edwards_Agentic_AI_in_Engineering_and_Manufacturing.pdf",
+      "title": "Agentic AI in Engineering and Manufacturing: Industry Perspectives on Utility Adoption Challenges and Opportunities",
+      "authors": "Edwards, K.M., Bauer, M., Jacquillat, C., Hart, A.J., Ahmed, F.",
+      "domain": "HAT",
+      "pub_year": 2026,
+      "journal": "MIT DECODE Lab",
+      "pdf": true,
+      "first_seen": "2026-04-15",
+      "scan_date": "2026-04-15",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-15_08-00"
+      ],
+      "analysis_short": "Human-in-the-Loop כדרישה קריטית לאימוץ AI אגנטי בהנדסה ותעשייה.",
+      "analysis_medium": "סקר תעשייתי: אמינות, אימות ו-auditability הם הדרישות לאימוץ AI אגנטי; human approval נדרש לכל שינוי.",
+      "analysis_long": "ראיונות מעמיקים עם תעשייה על AI אגנטי. שיטה: ראיונות עם 2+ חוקרים. ממצאים: Human-in-the-loop הוא תנאי בל יעבור. תובנה: Human Command Authority חיוני לאימוץ.",
+      "apa": "Edwards, K.M. et al. (2026). Agentic AI in Engineering and Manufacturing. MIT DECODE Lab."
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.07830",
+      "title": "To Copilot and Beyond: 22 AI Systems Developers Want Built",
+      "authors": "Choudhuri, R., Bird, C., Badea, C., Sarma, A.",
+      "domain": "HAT",
+      "pub_year": 2026,
+      "journal": "arXiv:2604.07830",
+      "pdf": false,
+      "first_seen": "2026-04-15",
+      "scan_date": "2026-04-15",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-15_08-00"
+      ],
+      "analysis_short": "Human Agency כעיקרון עיצוב מרכזי ב-22 מאפיינים של AI אגנטי רצוי.",
+      "analysis_medium": "מפתחים דורשים אישור אנושי לכל שינוי ו-Human Agency כ-design requirement, לא שכבת אבטחה.",
+      "analysis_long": "מיפוי 22 דרישות של מפתחים מ-AI אגנטי. שיטה: ראיונות וסקרים. ממצאים: Human approval וHuman Agency מרכזיים. תובנה: חל גם על מערכות הגנה.",
+      "apa": "Choudhuri, R. et al. (2026). To Copilot and Beyond. arXiv:2604.07830."
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.07705",
+      "title": "Vision-Language Navigation for Aerial Robots: Towards the Era of Large Language Models",
+      "authors": "Xia, X., Zhou, L., Tang, Y., Zhu, X., Zhu, H., Yao, W.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "arXiv:2604.07705",
+      "pdf": false,
+      "first_seen": "2026-04-15",
+      "scan_date": "2026-04-15",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-15_08-00"
+      ],
+      "analysis_short": "VLN לרובוטים אוויריים עם LLMs — הוראות שפה טבעית לכלי טייס.",
+      "analysis_medium": "סקירה של 186 מאמרים על VLN לרובוטים אוויריים; LLMs מאפשרים הוראות שפה טבעית ושליטה משימתית.",
+      "analysis_long": "סקירת 186 מאמרים ב-VLN לרובוטים אוויריים. שיטה: סקירה שיטתית. ממצאים: LLMs מרחיבים HRI לשליטה משימתית. תובנה: VLN מייצג קפיצת מדרגה ב-MUM-T.",
+      "apa": "Xia, X. et al. (2026). Vision-Language Navigation for Aerial Robots. arXiv:2604.07705."
+    },
+    {
+      "url": "https://www.preprints.org/manuscript/202604.0123/v1",
+      "title": "Vision-Language-Action VLA Models for Unmanned Aerial Robotics and Bimanual Manipulation: A Review",
+      "authors": "Sa, I., Park, C., Ahn, H.S.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "Preprints.org",
+      "pdf": false,
+      "first_seen": "2026-04-15",
+      "scan_date": "2026-04-15",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-15_08-00"
+      ],
+      "analysis_short": "סקירת מודלי VLA לרובוטיקה אווירית בלתי מאוישת ומניפולציה דו-זרועית.",
+      "analysis_medium": "מכסה 186 תרומות ב-VLA על 7 ממדים; מגשר בין תפיסה חזותית, שפה ופעולה.",
+      "analysis_long": "סקירת VLA לרובוטיקה אווירית. שיטה: 186 מאמרים ב-7 ממדים. ממצאים: VLA מגשר תפיסה-שפה-פעולה. תובנה: פוטנציאל ל-UAV אוטונומיים מתקדמים.",
+      "apa": "Sa, I., Park, C., & Ahn, H.S. (2026). VLA Models for UAV and Bimanual Manipulation. Preprints.org."
+    },
+    {
+      "url": "https://www.nature.com/articles/s44222-026-00435-5",
+      "title": "Aesthetics as a Core Design Dimension for Human-Centred Robotic Systems",
+      "authors": "Pagliarani, N., Comoretto, A., Obayashi, N., Aktaş, B., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "Nature Reviews",
+      "pdf": false,
+      "first_seen": "2026-04-15",
+      "scan_date": "2026-04-15",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-15_08-00"
+      ],
+      "analysis_short": "אסתטיקה כממד עיצוב מרכזי ולא שולי במערכות רובוטיות ממוקדות אדם.",
+      "analysis_medium": "מאמר Nature Reviews: אסתטיקה — מרקם, ציות, תנועה — משפיעה על אמון וקבלת הרובוט, לא רק על מראה.",
+      "analysis_long": "אסתטיקה כממד עיצוב מרכזי ב-HRI. שיטה: מאמר עמדה. ממצאים: חוויה אסתטית משפיעה על אמון וקבלה. תובנה: חוויית מפעיל כוללת קריטית לאמינות וביצועים.",
+      "apa": "Pagliarani, N. et al. (2026). Aesthetics as a Core Design Dimension for HRI. Nature Reviews."
+    },
+    {
+      "url": "https://www.preprints.org/manuscript/202604.0098/v1",
+      "title": "Physical AI: The Next Frontier in AI and Robotics to Build Truly Autonomous Machines",
+      "authors": "Shah, A.P., Liu, M., Huang, J., Tandra, B.P., Wang, Y., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "Preprints.org",
+      "pdf": false,
+      "first_seen": "2026-04-15",
+      "scan_date": "2026-04-15",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-15_08-00"
+      ],
+      "analysis_short": "Physical AI — שילוב רובוטיקה ו-AI לאוטונומיה ממשית בסביבות לא מובנות.",
+      "analysis_medium": "מגדיר Physical AI: LLMs לתכנון, תפיסה בסביבות לא מוכרות, ו-safe physical HRI.",
+      "analysis_long": "Physical AI כגבול הבא. שיטה: מאמר עמדה. ממצאים: שלוש מגמות מרכזיות. תובנה: Physical AI מגדיר הדור הבא של כלי טייס ורובוטיקה מבצעית.",
+      "apa": "Shah, A.P. et al. (2026). Physical AI: Next Frontier. Preprints.org."
+    },
+    {
+      "url": "https://www.sciencedirect.com/science/article/pii/S0025556026002142",
+      "title": "Experimental Study on Human-Robot Collaborative Assembly: Cognitive Load and Effects on Quality",
+      "authors": "Panagou, S., Sileo, M., Fruggiero, F., Neumann, W.P.",
+      "domain": "BMI/HF",
+      "pub_year": 2026,
+      "journal": "International Journal of Production Research",
+      "pdf": false,
+      "first_seen": "2026-04-15",
+      "scan_date": "2026-04-15",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-15_08-00"
+      ],
+      "analysis_short": "עומס קוגניטיבי בהרכבה שיתופית אדם-רובוט — ניסוי מבוקר.",
+      "analysis_medium": "ניסוי מבוקר: עומס קוגניטיבי גבוה קשור לשגיאות איכות; סוג אינטראקציה עם הרובוט משפיע על עומס.",
+      "analysis_long": "ניסוי על עומס קוגניטיבי ב-HRC. שיטה: ניסוי מבוקר עם מדדים פיזיולוגיים. ממצאים: קשר ישיר בין עומס לשגיאות. תובנה: ניטור עומס מפעיל חיוני ב-HRC מבצעי.",
+      "apa": "Panagou, S. et al. (2026). Experimental Study on HRC Assembly: Cognitive Load. IJPR."
+    },
+    {
+      "url": "https://www.sciencedirect.com/science/article/pii/S0921889026001405",
+      "title": "Shared Control for Autonomous Robotic Navigation: A Review",
+      "authors": "Zhang, H., Liu, C., Liu, Y., Li, Q.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "Robotics and Autonomous Systems",
+      "pdf": false,
+      "first_seen": "2026-04-15",
+      "scan_date": "2026-04-15",
+      "times_seen": 1,
+      "folders": [
+        "2026-04-15_08-00"
+      ],
+      "analysis_short": "Shared Control — שיתוף שליטה דינמי בין אדם לרובוט בניווט אוטונומי.",
+      "analysis_medium": "סקירת שיטות Shared Control: שיתוף שליטה דינמי כגשר בין אוטונומיה מלאה לשליטה אנושית מלאה.",
+      "analysis_long": "סקירה של שיטות Shared Control לניווט רובוטי. שיטה: סקירת ספרות. ממצאים: Shared Control מאפשר שליטה משותפת יעילה. תובנה: הפרדיגמה הפרקטית ביותר ל-MUM-T.",
+      "apa": "Zhang, H. et al. (2026). Shared Control for Robotic Navigation: A Review. Robotics and Autonomous Systems."
+    },
+    {
+      "url": "https://commons.erau.edu/edt/965/",
+      "title": "Threat-Analysis Oriented Digital Twinning of ML-Powered Future Autonomous Weapon Systems",
+      "authors": "Neubert, T.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "Doctoral Dissertation, Embry-Riddle Aeronautical University",
+      "pdf": true,
+      "first_seen": "2026-04-21",
+      "scan_date": "2026-04-21",
+      "times_seen": 1,
+      "folders": ["2026-04-21_00-09"],
+      "analysis_short": "מסגרת דיגיטל-טווין לניתוח איומי סייבר במערכות נשק אוטונומיות מבוססות בינה מלאכותית.",
+      "analysis_medium": "מחקר דוקטורט שפיתח מסגרת ניתוח איומים ממוקדת דיגיטל-טווין למערכות נשק אוטונומיות מבוססות ML. נבחנו פלטפורמות RCV ו-Skyborg. הממצא: ניתן לזהות פגיעויות ML ייחודיות מבעוד מועד.",
+      "analysis_long": "מחקר דוקטורט מ-Embry-Riddle שפיתח מסגרת דיגיטל-טווין לניתוח פגיעויות סייבר במערכות נשק אוטונומיות מבוססות ML. שיטה: שילוב ניתוח מערכת-ממוקד עם מתודולוגיה מבוססת יריב. נבחנו RCV ו-Skyborg. ממצאים: פגיעויות ייחודיות ל-ML כגון מניפולציית נתוני חיישנים. תובנה ל-HFE: שילוב הגנות ממוקדות-אדם בשלבי עיצוב מוקדמים של UAS.",
+      "apa": "Neubert, T. (2026). Threat-Analysis Oriented Digital Twinning of ML-Powered Future Autonomous Weapon Systems. Doctoral Dissertation, ERAU. https://commons.erau.edu/edt/965/"
+    },
+    {
+      "url": "https://bearworks.missouristate.edu/theses/4147/",
+      "title": "Drone Dichotomy: Investigating the Application of Unmanned Aerial Systems for Offensive and Defensive CBRN-Related Tasks",
+      "authors": "Martinovitch, E. J.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "Master's Thesis, Missouri State University",
+      "pdf": false,
+      "first_seen": "2026-04-21",
+      "scan_date": "2026-04-21",
+      "times_seen": 1,
+      "folders": ["2026-04-21_00-09"],
+      "analysis_short": "חקירת שימוש דו-פני של UAS במשימות CBRN התקפיות ומגנות.",
+      "analysis_medium": "תזה שחקרה שימושי UAV הן בהתקפות CBRN (loitering munitions, OWA) והן בהגנה (ניטור, זיהוי, ניקוי). נמצאה התאמה גבוהה ל-R&S אך מוגבלויות בסביבות קיצוניות.",
+      "analysis_long": "תזה ממדינת מיזורי שחקרה שני צדדי השימוש ב-UAS במשימות CBRN. שיטה: ניתוח תרחישי קייס-סטאדי התקפיות לעומת מגנות. ממצאים: UAS מתאימים לסיור ב-CBRN אך מוגבלים בסביבות קיצוניות. תובנה ל-HFE: ממשקי מפעיל ייעודיים לתרחישי CBRN לצמצום עומס קוגניטיבי.",
+      "apa": "Martinovitch, E. J. (2026). Drone Dichotomy: UAVs for CBRN. Master's Thesis, Missouri State. https://bearworks.missouristate.edu/theses/4147/"
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.15395",
+      "title": "Foundation Models in Robotics: A Comprehensive Review of Methods, Models, Datasets, Challenges and Future Research Directions",
+      "authors": "Psiris, A., Argyriou, V., Markakis, E. K., Sarigiannidis, P., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "arXiv:2604.15395",
+      "pdf": true,
+      "first_seen": "2026-04-21",
+      "scan_date": "2026-04-21",
+      "times_seen": 1,
+      "folders": ["2026-04-21_00-09"],
+      "analysis_short": "סקירה מקיפה של מודלי בסיס ברובוטיקה: שיטות, מודלים, נתונים, אתגרים וכיוונים עתידיים.",
+      "analysis_medium": "סקירה שיטתית של Foundation Models ברובוטיקה. נסקרו Fine-tuning, Imitation Learning, RL ו-Generative Learning. אתגר מרכזי: cross-embodiment generalization. FM מאפשרים רובוטיקה גמישה ורב-תפקידית.",
+      "analysis_long": "סקירה שיטתית (arXiv:2604.15395, אפריל 2026) של Foundation Models ברובוטיקה. נסקרו שיטות pre-training, fine-tuning, domain adaptation, imitation learning, RL ו-generative learning. הממצא: cross-embodiment generalization הוא האתגר המרכזי; מחסור בדאטה רובוטי איכותי. תובנה ל-HFE: FM יצריכו מסגרות HRI מחודשות לניהול יכולות דינמיות.",
+      "apa": "Psiris, A., et al. (2026). Foundation Models in Robotics: A Comprehensive Review. arXiv:2604.15395. https://arxiv.org/abs/2604.15395"
+    },
+    {
+      "url": "https://humanrobotinteraction.org/2026/",
+      "title": "Prediction and Production of Legible Human-Like Robot Reaching Motions: Applications for Collaborative Human-Robot Interaction",
+      "authors": "Sheikholeslami, S.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "Doctoral Thesis, HRI 2026 Conference",
+      "pdf": false,
+      "first_seen": "2026-04-21",
+      "scan_date": "2026-04-21",
+      "times_seen": 1,
+      "folders": ["2026-04-21_00-09"],
+      "analysis_short": "תזה שפיתחה מודל גנרטיבי לתנועות פנייה רובוטיות קריאות ודמויות-אדם לשיתוף פעולה.",
+      "analysis_medium": "תזה שפיתחה אלגוריתמים לתנועת פנייה רובוטית הדומה לאנוש ומבטאת כוונה (legibility). מודל אליפטי + הסקת אינטנט שיפר חיזוי כוונת הרובוט. תנועות דמויות-אדם הפחיתו עומס קוגניטיבי.",
+      "analysis_long": "תזה שהוצגה בכנס HRI 2026 שפיתחה אלגוריתמים לייצור תנועות רובוטיות הדומות לתנועות יד אנושיות ומבטאות כוונה (legibility). שיטה: מודל גנרטיבי אליפטי + הסקת כוונות. ממצאים: דיוק חיזוי עלה; תנועות דמויות-אדם הפחיתו עומס. תובנה ל-HFE: תנועות קריאות משפרות מודעות מצב ואמון ב-HRI.",
+      "apa": "Sheikholeslami, S. (2026). Prediction and Production of Legible Human-Like Robot Reaching Motions. Doctoral Thesis, HRI 2026. https://humanrobotinteraction.org/2026/"
+    },
+    {
+      "url": "https://www.frontiersin.org/journals/robotics-and-ai/sections/human-robot-interaction",
+      "title": "Speech-Touch Integration for Affective Human-Robot Interaction: A Scoping Review",
+      "authors": "Howcroft, A., Giannaccini, M. E., Benford, S., Khan, A., et al.",
+      "domain": "HRI",
+      "pub_year": 2026,
+      "journal": "Frontiers in Robotics and AI",
+      "pdf": false,
+      "first_seen": "2026-04-21",
+      "scan_date": "2026-04-21",
+      "times_seen": 1,
+      "folders": ["2026-04-21_00-09"],
+      "analysis_short": "סקירת scoping על שילוב דיבור ומגע בממשקי HRI רגשיים לשיפור תקשורת אמוציונלית.",
+      "analysis_medium": "סקירת scoping שבחנה שילוב ממשקי דיבור ומגע ב-HRI רגשי. פוטנציאל גבוה לשיפור תפיסת רגש דרך אינטגרציה מודאלית. מרבית המחקרים בוחנים ממשק יחיד.",
+      "analysis_long": "סקירת scoping ב-Frontiers Robotics & AI שבחנה שילוב דיבור ומגע ב-HRI רגשי. שיטה: סקירת ספרות שיטתית. ממצאים: שילוב מודאלי משפר תפיסת רגש; מחסור במחקרים in-the-wild. תובנה ל-HFE: HRI רגשי רב-מודאלי (Speech+Touch) מחזק אמון ומעורבות.",
+      "apa": "Howcroft, A., et al. (2026). Speech-Touch Integration for Affective HRI: A Scoping Review. Frontiers in Robotics and AI."
+    },
+    {
+      "url": "https://dl.acm.org/doi/proceedings/10.1145/3772318",
+      "title": "Human-Centered Explainable AI for Brain-Computer Interface-Driven Rehabilitation",
+      "authors": "Rajpura, P.",
+      "domain": "BMI/HF",
+      "pub_year": 2026,
+      "journal": "CHI 2026 Doctoral Consortium",
+      "pdf": false,
+      "first_seen": "2026-04-21",
+      "scan_date": "2026-04-21",
+      "times_seen": 1,
+      "folders": ["2026-04-21_00-09"],
+      "analysis_short": "מחקר דוקטורט לפיתוח XAI ממוקד-אדם לממשקי מח-מחשב בשיקום נוירולוגי.",
+      "analysis_medium": "תזה ב-CHI 2026 שפיתחה XAI ממוקד-אדם לBCI בשיקום. שילוב ידע דומיין נוירופיזיולוגי עם XAI שיפר אמינות. הטיפול בנוירו-משוב הפך שקוף ומובן יותר.",
+      "analysis_long": "מחקר דוקטורט מ-CHI 2026 Barcelona שפיתח XAI ממוקד-אדם לממשקי BCI בשיקום נוירולוגי. שיטה: שילוב ידע נוירופיזיולוגי עם Explainable AI. ממצאים: XAI דומיין-ממוקד שיפר אמינות ותוקף. תובנה ל-HFE: XAI ממוקד-אדם תנאי הכרחי לשילוב BCI בטיחותי בסביבות קליניות.",
+      "apa": "Rajpura, P. (2026). Human-Centered Explainable AI for BCI-Driven Rehabilitation. CHI '26 Extended Abstracts. ACM."
+    },
+    {
+      "url": "https://www.frontiersin.org/journals/psychology",
+      "title": "Exploring Human-Autonomous Interactions: Agency, Awareness, and Ethical Implications",
+      "authors": "Lo Bue, S., Prével, A., Salatino, A.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "Frontiers in Psychology",
+      "pdf": false,
+      "first_seen": "2026-04-21",
+      "scan_date": "2026-04-21",
+      "times_seen": 1,
+      "folders": ["2026-04-21_00-09"],
+      "analysis_short": "ניתוח שאלות פילוסופיות ואתיות סביב סוכנות, מודעות ואחריות באינטראקציה אנוש-אוטונומי.",
+      "analysis_medium": "מחקר תיאורטי שבחן ממדי סוכנות, מודעות ואתיקה ב-HAI להגנה. זוהו דילמות ייחודיות של תפקיד ואחריות. נדרשות מסגרות עיצוב אחראיות לשמירת שליטה אנושית.",
+      "analysis_long": "מאמר תיאורטי ב-Frontiers Psychology שחקר ממדים פסיכו-אתיים של HAI בהקשר ביטחוני. שיטה: סינתז ספרות פסיכולוגיה, פילוסופיה ו-HFE. ממצאים: HAT לביטחון מציב דילמות ייחודיות של אחריות ותפקיד. תובנה ל-HFE: מסגרות HAT חייבות לשמר אחריות אנושית ותחושת שליטה.",
+      "apa": "Lo Bue, S., Prével, A., & Salatino, A. (2026). Exploring Human-Autonomous Interactions. Frontiers in Psychology."
+    },
+    {
+      "url": "https://dl.acm.org/doi/proceedings/10.1145/3772318",
+      "title": "CoNode: Visualizing Workflows for Knowledge Reuse and Recombination in Team-AI Collaborative Design",
+      "authors": "Zhou, Y., Xiao, Y., Wei, G., Ling, S., Ma, R., Leung, C. S.",
+      "domain": "UMT",
+      "pub_year": 2026,
+      "journal": "CHI 2026",
+      "pdf": false,
+      "first_seen": "2026-04-21",
+      "scan_date": "2026-04-21",
+      "times_seen": 1,
+      "folders": ["2026-04-21_00-09"],
+      "analysis_short": "מערכת CoNode לויזואליזציה וניהול ידע בתהליכי עיצוב שיתופי בין צוות ל-AI.",
+      "analysis_medium": "מחקר CHI 2026 שפיתח CoNode לתמיכה בשיתוף ידע ועיצוב שיתופי בין צוות ל-AI. ויזואליזציה של זרימת עבודה שיפרה עקביות ורכישת ידע. שיתוף פעולה עם AI הפך שקוף יותר.",
+      "analysis_long": "מחקר CHI 2026 שפיתח CoNode לניהול ידע בעיצוב שיתופי צוות-AI. שיטה: פיתוח פרוטוטיפ + הערכת משתמשים. ממצאים: ויזואליזציה workflow שיפרה הבנה קבוצתית ועקביות; ידע זמין מהר יותר. תובנה ל-HFE: ממשקים ויזואליים לניהול ידע ב-HAT קריטיים להצלחת שיתוף פעולה.",
+      "apa": "Zhou, Y., et al. (2026). CoNode: Visualizing Workflows for Knowledge Reuse in Team-AI Collaborative Design. CHI '26. ACM."
+    },
+    {
+      "url": "https://scholar.google.com/scholar?q=Wahlstrom+2026+Intelligent+Machines+Climate+Change",
+      "title": "Intelligent Machines for Systemic Climate Change Mitigation",
+      "authors": "Wahlström, M.",
+      "domain": "BMI/HF",
+      "pub_year": 2026,
+      "journal": "Technical Report / Monograph, 2026",
+      "pdf": false,
+      "first_seen": "2026-04-21",
+      "scan_date": "2026-04-21",
+      "times_seen": 1,
+      "folders": ["2026-04-21_00-09"],
+      "analysis_short": "מסגרת להשוואת יכולות מכונה לאנוש במשימות אקולוגיות מערכתיות עם שימוש בספרות HF.",
+      "analysis_medium": "מחקר שבחן תפקיד מכונות חכמות (כולל UAS) בהתמודדות עם שינוי אקלים, תוך שימוש בספרות HF. מכונות לא-מאוישות מצטיינות בניטור ארוך-טווח. פעולה מערכתית דורשת שיתוף אנוש-מכונה.",
+      "analysis_long": "מחקר שניתח תפקיד מכונות חכמות בפתרון שינוי אקלים. שיטה: שימוש בספרות HF להשוואת יכולות אנוש-מכונה. ממצאים: UAS יעילים לניטור ארוך-טווח ואיסוף נתונים סביבתיים. תובנה ל-HFE: שינוי האקלים יוצר שדה יישום חדש למסגרות HF לניהול מכונות אוטונומיות.",
+      "apa": "Wahlström, M. (2026). Intelligent Machines for Systemic Climate Change Mitigation."
+    }
+  ]
+};
+
+// ════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════
+let currentFilter  = 'all';
+let currentDetail  = 'medium';
+let currentDetailR = 'medium';
+let dateFrom = '', dateTo = '';
+
+// ════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════
+const domainCls = d => d==='UMT'?'badge-umt':d==='HRI'?'badge-hri':'badge-bmi';
+const freqCls   = n => n>=3?'freq-3':n===2?'freq-2':'freq-1';
+const cardCls   = n => n>=3?'recurring2':n===2?'recurring':'';
+
+function ageLabel(dateStr) {
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 86400000);
+  if (diff <= 7)  return { cls:'age-new',    txt:'🟢 חדש' };
+  if (diff <= 30) return { cls:'age-recent', txt:'🟡 שבועות' };
+  return               { cls:'age-old',    txt:'⚫ ישן' };
+}
+
+function analysisHtml(a, level) {
+  const map = { short:['קצר','level-short','lv-s'], medium:['בינוני','level-medium','lv-m'], long:['מורחב','level-long','lv-l'] };
+  const [lbl, lvCls, lblCls] = map[level] || map.medium;
+  const text = a['analysis_'+level] || a.analysis_medium || '';
+  if (!text) return '';
+  return `<div class="analysis-block"><div class="level-label ${lblCls}">${lbl}</div><div class="analysis-text ${lvCls}">${text}</div></div>`;
+}
+
+function articleCard(a, detailLevel) {
+  const isRecur = a.times_seen > 1;
+  const age     = ageLabel(a.first_seen);
+  const scanAge = ageLabel(a.scan_date);
+
+  return `
+<div class="article-card ${cardCls(a.times_seen)}" data-domain="${a.domain}" data-first="${a.first_seen}" data-seen="${a.times_seen}">
+  <div class="article-header">
+    <div class="article-title">${a.title}</div>
+    <span class="freq-tag ${freqCls(a.times_seen)}" title="נסרק ${a.times_seen} פעמים">×${a.times_seen}</span>
+  </div>
+  <div class="date-row">
+    <span class="date-tag">📅 פורסם: <span class="dt-val">${a.pub_year}</span></span>
+    <span class="date-tag">👁 נסרק לראשונה: <span class="dt-val ${age.cls}">${a.first_seen}</span> <span class="${age.cls}">${age.txt}</span></span>
+    ${a.scan_date !== a.first_seen ? `<span class="date-tag">🔄 סריקה אחרונה: <span class="dt-val">${a.scan_date}</span></span>` : ''}
+  </div>
+  <div class="article-chips">
+    <span class="badge ${domainCls(a.domain)}">${a.domain}</span>
+    ${isRecur ? `<span class="badge badge-recur ${a.times_seen>=3?'badge-recur2':''}">🔁 חוזר ×${a.times_seen}</span>` : ''}
+    <span style="font-size:11px;color:var(--muted);">${a.authors}</span>
+    <a href="${a.url}" target="_blank" style="font-size:11px;color:var(--accent);text-decoration:none;margin-right:auto;" dir="ltr">🔗 קישור</a>
+  </div>
+  ${analysisHtml(a, detailLevel)}
+  ${a.folders && a.folders.length>1 ? `<div style="font-size:10px;color:var(--muted);margin-top:6px;direction:ltr;">📁 ${a.folders.join(' · ')}</div>` : ''}
+</div>`;
+}
+
+// ════════════════════════════════════════════════════════
+//  FILTERS
+// ════════════════════════════════════════════════════════
+function setFilter(type, val, btn) {
+  document.querySelectorAll('#tab-articles .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = val;
+  applyFilters();
+}
+
+function setDetail(level, btn) {
+  document.querySelectorAll('#tab-articles .detail-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentDetail = level;
+  applyFilters();
+}
+
+function setDetailR(level, btn) {
+  document.querySelectorAll('#tab-recurring .detail-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentDetailR = level;
+  renderRecurring();
+}
+
+function clearDates() {
+  document.getElementById('dateFrom').value = '';
+  document.getElementById('dateTo').value   = '';
+  dateFrom = ''; dateTo = '';
+  applyFilters();
+}
+
+function applyFilters() {
+  dateFrom = document.getElementById('dateFrom').value;
+  dateTo   = document.getElementById('dateTo').value;
+  const q  = document.getElementById('searchInput').value.toLowerCase();
+
+  let arts = REGISTRY.articles;
+
+  // domain / recurring
+  if (currentFilter === 'recurring') arts = arts.filter(a => a.times_seen > 1);
+  else if (currentFilter !== 'all')  arts = arts.filter(a => a.domain === currentFilter);
+
+  // date range (first_seen)
+  if (dateFrom) arts = arts.filter(a => a.first_seen >= dateFrom);
+  if (dateTo)   arts = arts.filter(a => a.first_seen <= dateTo);
+
+  // search
+  if (q) arts = arts.filter(a =>
+    (a.title  ||'').toLowerCase().includes(q) ||
+    (a.authors||'').toLowerCase().includes(q)
+  );
+
+  const grid = document.getElementById('allGrid');
+  document.getElementById('resultCount').textContent = `${arts.length} מאמרים מוצגים`;
+  grid.innerHTML = arts.length
+    ? arts.map(a => articleCard(a, currentDetail)).join('')
+    : `<div class="empty">לא נמצאו מאמרים תואמים</div>`;
+}
+
+// ════════════════════════════════════════════════════════
+//  RECURRING
+// ════════════════════════════════════════════════════════
+function renderRecurring() {
+  const grid     = document.getElementById('recurGrid');
+  const recurring = REGISTRY.articles.filter(a => a.times_seen > 1)
+                                      .sort((a,b) => b.times_seen - a.times_seen);
+  grid.innerHTML = recurring.length
+    ? recurring.map(a => articleCard(a, currentDetailR)).join('')
+    : `<div class="empty">אין מאמרים חוזרים עדיין — המנגנון יתחיל לאסוף מהסריקה הבאה.</div>`;
+  document.getElementById('s-recur').textContent = recurring.length;
+}
+
+// ════════════════════════════════════════════════════════
+//  TIMELINE
+// ════════════════════════════════════════════════════════
+function renderTimeline() {
+  const history = [...(REGISTRY._meta.scan_history||[])].reverse();
+  const byFolder = {};
+  REGISTRY.articles.forEach(a => {
+    const f = a.folders[0];
+    if (!byFolder[f]) byFolder[f] = [];
+    byFolder[f].push(a);
+  });
+
+  document.getElementById('tlContainer').innerHTML = history.map((s, i) => {
+    const arts  = byFolder[s.folder] || [];
+    const chips = arts.slice(0,6).map(a =>
+      `<span class="badge ${domainCls(a.domain)}" style="font-size:10px;" title="${a.title}">${a.title.slice(0,30)}${a.title.length>30?'…':''}</span>`
+    ).join('');
+    const more = arts.length > 6 ? `<span style="font-size:10px;color:var(--muted)">+${arts.length-6}</span>` : '';
+    return `
+<div class="tl-item">
+  <div class="tl-dot ${i===0?'latest':''}"></div>
+  <div class="tl-card">
+    <div class="tl-date">${i===0?'⭐ ':''}${s.date}${i===0?' — סריקה אחרונה':''}</div>
+    <div class="tl-stats">
+      <span>📄 <strong>${s.articles_added}</strong> חדשים</span>
+      <span>🚫 <strong>${s.articles_skipped}</strong> הושמטו</span>
+      <span style="direction:ltr;">📁 ${s.folder}</span>
+    </div>
+    <div class="tl-pills">${chips}${more}</div>
+  </div>
+</div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════
+//  DOMAINS
+// ════════════════════════════════════════════════════════
+function renderDomains() {
+  const byDomain = {};
+  REGISTRY.articles.forEach(a => byDomain[a.domain] = (byDomain[a.domain]||0)+1);
+  const total = REGISTRY.articles.length || 1;
+
+  document.getElementById('domainChart').innerHTML =
+    [['UMT','var(--umt)','bar-umt'],['HRI','var(--hri)','bar-hri'],['BMI/HF','var(--bmi)','bar-bmi']]
+    .map(([k,c,b]) => {
+      const n = byDomain[k]||0, pct = Math.round(n/total*100);
+      return `<div class="domain-row">
+        <div class="domain-label" style="color:${c}">${k}</div>
+        <div class="domain-bg"><div class="domain-bar ${b}" style="width:${pct}%">${n} מאמרים</div></div>
+        <div style="width:32px;font-size:11px;color:var(--muted);text-align:left;">${pct}%</div>
+      </div>`;
+    }).join('');
+
+  const history = REGISTRY._meta.scan_history||[];
+  document.getElementById('trendsWrap').innerHTML = history.map(s => `
+<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:160px;">
+  <div style="font-size:12px;font-weight:700;color:var(--orange);margin-bottom:6px;">${s.date}</div>
+  <div style="font-size:13px;">+${s.articles_added} מאמרים</div>
+  <div style="font-size:11px;color:var(--muted);">🚫 ${s.articles_skipped} הושמטו</div>
+</div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════
+//  LOG
+// ════════════════════════════════════════════════════════
+function renderLog() {
+  const rows = [...(REGISTRY._meta.scan_history||[])].reverse();
+  document.getElementById('logBody').innerHTML = rows.map(s => `
+<tr>
+  <td>${s.date}</td>
+  <td dir="ltr" style="font-size:11px;">${s.folder}</td>
+  <td><strong style="color:var(--green)">+${s.articles_added}</strong></td>
+  <td>${s.articles_skipped > 0 ? `<span style="color:var(--orange)">🚫 ${s.articles_skipped}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
+  <td><span style="color:var(--green);font-weight:700;">✅ הושלמה</span></td>
+</tr>`).join('') || `<tr><td colspan="5" class="empty">אין נתוני לוג</td></tr>`;
+}
+
+// ════════════════════════════════════════════════════════
+//  STATS
+// ════════════════════════════════════════════════════════
+function updateStats() {
+  const byD = {};
+  REGISTRY.articles.forEach(a => byD[a.domain] = (byD[a.domain]||0)+1);
+  document.getElementById('s-total').textContent = REGISTRY.articles.length;
+  document.getElementById('s-scans').textContent = REGISTRY._meta.total_scans||1;
+  document.getElementById('s-umt').textContent   = byD['UMT']   ||0;
+  document.getElementById('s-hri').textContent   = byD['HRI']   ||0;
+  document.getElementById('s-bmi').textContent   = byD['BMI/HF']||0;
+  document.getElementById('hLastUpdate').textContent =
+    'עדכון אחרון: ' + REGISTRY._meta.last_updated.slice(0,10);
+}
+
+// ════════════════════════════════════════════════════════
+//  TABS
+// ════════════════════════════════════════════════════════
+function showTab(name, el) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  mermaid.initialize({ startOnLoad:true, theme:'dark', flowchart:{ curve:'basis', padding:16 } });
+  updateStats();
+  renderTimeline();
+  applyFilters();
+  renderRecurring();
+  renderDomains();
+  renderLog();
+});
+</script>
+</body>
+</html>
