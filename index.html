@@ -144,6 +144,34 @@ body { font-family:'Segoe UI','Arial Hebrew',Arial,sans-serif; background:var(--
 .empty { color:var(--muted); font-size:13px; text-align:center; padding:40px; }
 
 @media (max-width:600px) { .tab-pane{padding:16px;} .header{padding:16px;} .tabs{padding:0 12px;} }
+
+/* ABSTRACT BLOCKS */
+.abstract-section { margin-top:10px; }
+.abstract-lang-tabs { display:flex; gap:0; margin-bottom:0; }
+.ab-tab { padding:3px 10px; font-size:10px; font-weight:700; cursor:pointer; border:1px solid var(--border); background:var(--surface); color:var(--muted); border-bottom:none; border-radius:4px 4px 0 0; }
+.ab-tab.active { background:var(--surface2); color:var(--text); border-color:var(--accent); }
+.abstract-body { background:var(--surface); border:1px solid var(--border); border-radius:0 4px 4px 4px; padding:10px 14px; font-size:12px; line-height:1.8; color:#b8c8e8; display:none; }
+.abstract-body.visible { display:block; }
+.abstract-he { direction:rtl; text-align:right; }
+.abstract-en { direction:ltr; text-align:left; }
+.no-abstract { font-size:11px; color:var(--muted); font-style:italic; }
+
+/* COPY + PDF BUTTONS */
+.card-actions { display:flex; align-items:center; gap:8px; margin-top:10px; flex-wrap:wrap; }
+.action-btn { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; border:1px solid var(--border); background:var(--surface); color:var(--muted); transition:all .2s; text-decoration:none; }
+.action-btn:hover { border-color:var(--accent); color:var(--accent); background:rgba(79,131,255,.08); }
+.pdf-open  { border-color:rgba(62,207,142,.4); color:var(--green); }
+.pdf-open:hover { background:rgba(62,207,142,.12); }
+.pdf-lock  { border-color:rgba(244,107,107,.4); color:var(--red); }
+.pdf-lock:hover { background:rgba(244,107,107,.08); }
+.copy-done { color:var(--green) !important; }
+
+/* QUICK DATE BUTTONS */
+.quick-dates { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px; }
+.quick-date-btn { padding:4px 12px; border-radius:14px; border:1px solid var(--border); background:var(--surface2); color:var(--muted); cursor:pointer; font-size:11px; font-weight:700; transition:all .2s; }
+.quick-date-btn:hover { border-color:var(--orange); color:var(--orange); }
+.quick-date-btn.active { background:rgba(248,169,72,.18); color:var(--orange); border-color:var(--orange); }
+
 </style>
 </head>
 <body>
@@ -201,6 +229,14 @@ body { font-family:'Segoe UI','Arial Hebrew',Arial,sans-serif; background:var(--
     <button class="filter-btn" onclick="setFilter('domain','HRI',this)">HRI</button>
     <button class="filter-btn" onclick="setFilter('domain','BMI/HF',this)">BMI/HF</button>
     <button class="filter-btn" onclick="setFilter('domain','recurring',this)">🔁 חוזרים</button>
+  </div>
+
+  <!-- Quick date shortcuts -->
+  <div class="quick-dates" id="quickDates">
+    <button class="quick-date-btn" onclick="quickDate('day',this)">📅 יום אחרון</button>
+    <button class="quick-date-btn" onclick="quickDate('week',this)">📅 שבוע אחרון</button>
+    <button class="quick-date-btn" onclick="quickDate('lastrun',this)">⭐ הרצה האחרונה</button>
+    <button class="quick-date-btn" onclick="quickDate('all',this)">🔄 הכל</button>
   </div>
 
   <!-- Date range filter -->
@@ -1666,7 +1702,9 @@ const REGISTRY = {
       "analysis_short": "מסגרת דיגיטל-טווין לניתוח איומי סייבר במערכות נשק אוטונומיות מבוססות בינה מלאכותית.",
       "analysis_medium": "מחקר דוקטורט שפיתח מסגרת ניתוח איומים ממוקדת דיגיטל-טווין למערכות נשק אוטונומיות מבוססות ML. נבחנו פלטפורמות RCV ו-Skyborg. הממצא: ניתן לזהות פגיעויות ML ייחודיות מבעוד מועד.",
       "analysis_long": "מחקר דוקטורט מ-Embry-Riddle שפיתח מסגרת דיגיטל-טווין לניתוח פגיעויות סייבר במערכות נשק אוטונומיות מבוססות ML. שיטה: שילוב ניתוח מערכת-ממוקד עם מתודולוגיה מבוססת יריב. נבחנו RCV ו-Skyborg. ממצאים: פגיעויות ייחודיות ל-ML כגון מניפולציית נתוני חיישנים. תובנה ל-HFE: שילוב הגנות ממוקדות-אדם בשלבי עיצוב מוקדמים של UAS.",
-      "apa": "Neubert, T. (2026). Threat-Analysis Oriented Digital Twinning of ML-Powered Future Autonomous Weapon Systems. Doctoral Dissertation, ERAU. https://commons.erau.edu/edt/965/"
+      "apa": "Neubert, T. (2026). Threat-Analysis Oriented Digital Twinning of ML-Powered Future Autonomous Weapon Systems. Doctoral Dissertation, ERAU. https://commons.erau.edu/edt/965/",
+      "abstract_en": "This doctoral dissertation develops a threat-analysis oriented digital twinning framework for evaluating cybersecurity vulnerabilities in ML-powered autonomous weapon systems. Applying a system-focused methodology with adversary-based threat modeling, the research examines RCV (Robotic Combat Vehicle) and Skyborg platforms. Findings reveal that ML-specific vulnerabilities—including adversarial sensor data manipulation—pose distinct risks not captured by conventional security analysis. The framework enables early-stage identification of critical threats before operational deployment.",
+      "abstract_he": "מחקר דוקטורט מ-Embry-Riddle שפיתח מסגרת דיגיטל-טווין לניתוח פגיעויות סייבר במערכות נשק אוטונומיות מבוססות ML. שיטה: שילוב ניתוח מערכת-ממוקד עם מתודולוגיה מבוססת יריב. נבחנו RCV ו-Skyborg. ממצאים: פגיעויות ייחודיות ל-ML כגון מניפולציית נתוני חיישנים. תובנה ל-HFE: שילוב הגנות ממוקדות-אדם בשלבי עיצוב מוקדמים של UAS."
     },
     {
       "url": "https://bearworks.missouristate.edu/theses/4147/",
@@ -1683,7 +1721,9 @@ const REGISTRY = {
       "analysis_short": "חקירת שימוש דו-פני של UAS במשימות CBRN התקפיות ומגנות.",
       "analysis_medium": "תזה שחקרה שימושי UAV הן בהתקפות CBRN (loitering munitions, OWA) והן בהגנה (ניטור, זיהוי, ניקוי). נמצאה התאמה גבוהה ל-R&S אך מוגבלויות בסביבות קיצוניות.",
       "analysis_long": "תזה ממדינת מיזורי שחקרה שני צדדי השימוש ב-UAS במשימות CBRN. שיטה: ניתוח תרחישי קייס-סטאדי התקפיות לעומת מגנות. ממצאים: UAS מתאימים לסיור ב-CBRN אך מוגבלים בסביבות קיצוניות. תובנה ל-HFE: ממשקי מפעיל ייעודיים לתרחישי CBRN לצמצום עומס קוגניטיבי.",
-      "apa": "Martinovitch, E. J. (2026). Drone Dichotomy: UAVs for CBRN. Master's Thesis, Missouri State. https://bearworks.missouristate.edu/theses/4147/"
+      "apa": "Martinovitch, E. J. (2026). Drone Dichotomy: UAVs for CBRN. Master's Thesis, Missouri State. https://bearworks.missouristate.edu/theses/4147/",
+      "abstract_en": "This thesis investigates the dual-use potential of unmanned aerial systems (UAS) for both offensive and defensive CBRN (Chemical, Biological, Radiological, Nuclear) tasks. Using case study analysis of operational scenarios, the research examines UAS applications including loitering munitions and OWA platforms for offensive roles, and detection, monitoring, and decontamination support for defensive roles. Results show high suitability for reconnaissance and surveillance but operational limitations in extreme CBRN environments.",
+      "abstract_he": "תזה ממדינת מיזורי שחקרה שני צדדי השימוש ב-UAS במשימות CBRN. שיטה: ניתוח תרחישי קייס-סטאדי התקפיות לעומת מגנות. ממצאים: UAS מתאימים לסיור ב-CBRN אך מוגבלים בסביבות קיצוניות. תובנה ל-HFE: ממשקי מפעיל ייעודיים לתרחישי CBRN לצמצום עומס קוגניטיבי."
     },
     {
       "url": "https://arxiv.org/abs/2604.15395",
@@ -1700,7 +1740,9 @@ const REGISTRY = {
       "analysis_short": "סקירה מקיפה של מודלי בסיס ברובוטיקה: שיטות, מודלים, נתונים, אתגרים וכיוונים עתידיים.",
       "analysis_medium": "סקירה שיטתית של Foundation Models ברובוטיקה. נסקרו Fine-tuning, Imitation Learning, RL ו-Generative Learning. אתגר מרכזי: cross-embodiment generalization. FM מאפשרים רובוטיקה גמישה ורב-תפקידית.",
       "analysis_long": "סקירה שיטתית (arXiv:2604.15395, אפריל 2026) של Foundation Models ברובוטיקה. נסקרו שיטות pre-training, fine-tuning, domain adaptation, imitation learning, RL ו-generative learning. הממצא: cross-embodiment generalization הוא האתגר המרכזי; מחסור בדאטה רובוטי איכותי. תובנה ל-HFE: FM יצריכו מסגרות HRI מחודשות לניהול יכולות דינמיות.",
-      "apa": "Psiris, A., et al. (2026). Foundation Models in Robotics: A Comprehensive Review. arXiv:2604.15395. https://arxiv.org/abs/2604.15395"
+      "apa": "Psiris, A., et al. (2026). Foundation Models in Robotics: A Comprehensive Review. arXiv:2604.15395. https://arxiv.org/abs/2604.15395",
+      "abstract_en": "This comprehensive review systematically surveys the application of foundation models (FMs) in robotics, covering pre-training strategies, fine-tuning, domain adaptation, imitation learning, reinforcement learning, and generative learning approaches. The paper catalogs existing models and datasets across manipulation, navigation, and multi-task robotics. Key findings identify cross-embodiment generalization as the central technical challenge and highlight the scarcity of large-scale, high-quality robotic training datasets as a primary bottleneck to progress.",
+      "abstract_he": "סקירה שיטתית (arXiv:2604.15395, אפריל 2026) של Foundation Models ברובוטיקה. נסקרו שיטות pre-training, fine-tuning, domain adaptation, imitation learning, RL ו-generative learning. הממצא: cross-embodiment generalization הוא האתגר המרכזי; מחסור בדאטה רובוטי איכותי. תובנה ל-HFE: FM יצריכו מסגרות HRI מחודשות לניהול יכולות דינמיות."
     },
     {
       "url": "https://humanrobotinteraction.org/2026/",
@@ -1717,7 +1759,9 @@ const REGISTRY = {
       "analysis_short": "תזה שפיתחה מודל גנרטיבי לתנועות פנייה רובוטיות קריאות ודמויות-אדם לשיתוף פעולה.",
       "analysis_medium": "תזה שפיתחה אלגוריתמים לתנועת פנייה רובוטית הדומה לאנוש ומבטאת כוונה (legibility). מודל אליפטי + הסקת אינטנט שיפר חיזוי כוונת הרובוט. תנועות דמויות-אדם הפחיתו עומס קוגניטיבי.",
       "analysis_long": "תזה שהוצגה בכנס HRI 2026 שפיתחה אלגוריתמים לייצור תנועות רובוטיות הדומות לתנועות יד אנושיות ומבטאות כוונה (legibility). שיטה: מודל גנרטיבי אליפטי + הסקת כוונות. ממצאים: דיוק חיזוי עלה; תנועות דמויות-אדם הפחיתו עומס. תובנה ל-HFE: תנועות קריאות משפרות מודעות מצב ואמון ב-HRI.",
-      "apa": "Sheikholeslami, S. (2026). Prediction and Production of Legible Human-Like Robot Reaching Motions. Doctoral Thesis, HRI 2026. https://humanrobotinteraction.org/2026/"
+      "apa": "Sheikholeslami, S. (2026). Prediction and Production of Legible Human-Like Robot Reaching Motions. Doctoral Thesis, HRI 2026. https://humanrobotinteraction.org/2026/",
+      "abstract_en": "This doctoral research develops algorithms for generating robot reaching motions that mimic human arm movements and communicate robot intent through legibility. The proposed framework combines an elliptical generative model with probabilistic intent inference. User studies demonstrate that legible, human-like motions significantly improve prediction accuracy of robot intent and reduce operator cognitive load in collaborative manipulation tasks, supporting safer and more efficient HRI in industrial settings.",
+      "abstract_he": "תזה שהוצגה בכנס HRI 2026 שפיתחה אלגוריתמים לייצור תנועות רובוטיות הדומות לתנועות יד אנושיות ומבטאות כוונה (legibility). שיטה: מודל גנרטיבי אליפטי + הסקת כוונות. ממצאים: דיוק חיזוי עלה; תנועות דמויות-אדם הפחיתו עומס. תובנה ל-HFE: תנועות קריאות משפרות מודעות מצב ואמון ב-HRI."
     },
     {
       "url": "https://www.frontiersin.org/journals/robotics-and-ai/sections/human-robot-interaction",
@@ -1734,7 +1778,9 @@ const REGISTRY = {
       "analysis_short": "סקירת scoping על שילוב דיבור ומגע בממשקי HRI רגשיים לשיפור תקשורת אמוציונלית.",
       "analysis_medium": "סקירת scoping שבחנה שילוב ממשקי דיבור ומגע ב-HRI רגשי. פוטנציאל גבוה לשיפור תפיסת רגש דרך אינטגרציה מודאלית. מרבית המחקרים בוחנים ממשק יחיד.",
       "analysis_long": "סקירת scoping ב-Frontiers Robotics & AI שבחנה שילוב דיבור ומגע ב-HRI רגשי. שיטה: סקירת ספרות שיטתית. ממצאים: שילוב מודאלי משפר תפיסת רגש; מחסור במחקרים in-the-wild. תובנה ל-HFE: HRI רגשי רב-מודאלי (Speech+Touch) מחזק אמון ומעורבות.",
-      "apa": "Howcroft, A., et al. (2026). Speech-Touch Integration for Affective HRI: A Scoping Review. Frontiers in Robotics and AI."
+      "apa": "Howcroft, A., et al. (2026). Speech-Touch Integration for Affective HRI: A Scoping Review. Frontiers in Robotics and AI.",
+      "abstract_en": "This scoping review systematically examines the integration of speech and touch modalities in affective human-robot interaction (HRI). Reviewing the existing literature, the authors identify significant potential for multimodal integration to improve emotional perception and relational engagement. A key finding is that most studies examine individual modalities in isolation, with few investigating combined Speech+Touch interfaces. The review calls for in-the-wild studies to evaluate multimodal affective HRI in real-world contexts.",
+      "abstract_he": "סקירת scoping ב-Frontiers Robotics & AI שבחנה שילוב דיבור ומגע ב-HRI רגשי. שיטה: סקירת ספרות שיטתית. ממצאים: שילוב מודאלי משפר תפיסת רגש; מחסור במחקרים in-the-wild. תובנה ל-HFE: HRI רגשי רב-מודאלי (Speech+Touch) מחזק אמון ומעורבות."
     },
     {
       "url": "https://dl.acm.org/doi/proceedings/10.1145/3772318",
@@ -1751,7 +1797,9 @@ const REGISTRY = {
       "analysis_short": "מחקר דוקטורט לפיתוח XAI ממוקד-אדם לממשקי מח-מחשב בשיקום נוירולוגי.",
       "analysis_medium": "תזה ב-CHI 2026 שפיתחה XAI ממוקד-אדם לBCI בשיקום. שילוב ידע דומיין נוירופיזיולוגי עם XAI שיפר אמינות. הטיפול בנוירו-משוב הפך שקוף ומובן יותר.",
       "analysis_long": "מחקר דוקטורט מ-CHI 2026 Barcelona שפיתח XAI ממוקד-אדם לממשקי BCI בשיקום נוירולוגי. שיטה: שילוב ידע נוירופיזיולוגי עם Explainable AI. ממצאים: XAI דומיין-ממוקד שיפר אמינות ותוקף. תובנה ל-HFE: XAI ממוקד-אדם תנאי הכרחי לשילוב BCI בטיחותי בסביבות קליניות.",
-      "apa": "Rajpura, P. (2026). Human-Centered Explainable AI for BCI-Driven Rehabilitation. CHI '26 Extended Abstracts. ACM."
+      "apa": "Rajpura, P. (2026). Human-Centered Explainable AI for BCI-Driven Rehabilitation. CHI '26 Extended Abstracts. ACM.",
+      "abstract_en": "This doctoral consortium paper proposes a human-centered explainable AI (XAI) framework for BCI-driven neurorehabilitation systems. The research addresses the gap between AI system performance metrics and clinical usability by integrating transparency and user trust into the BCI design pipeline. The proposed framework aims to support clinicians and patients in understanding AI-driven rehabilitation decisions, ultimately improving adoption and outcomes in BCI-based therapeutic settings.",
+      "abstract_he": "מאמר דוקטורט שהוצג ב-CHI 2026 המציע מסגרת XAI ממוקדת-אדם לממשקי BCI לשיקום. שיטה: עיצוב ממוקד-אדם עם מדדי שקיפות ואמון. ממצאים: פערים בין ביצועי AI ושמישות קלינית. תובנה ל-HFE: שקיפות מוגברת ב-BCI תשפר אימוץ ותוצאות שיקום."
     },
     {
       "url": "https://www.frontiersin.org/journals/psychology",
@@ -1768,7 +1816,9 @@ const REGISTRY = {
       "analysis_short": "ניתוח שאלות פילוסופיות ואתיות סביב סוכנות, מודעות ואחריות באינטראקציה אנוש-אוטונומי.",
       "analysis_medium": "מחקר תיאורטי שבחן ממדי סוכנות, מודעות ואתיקה ב-HAI להגנה. זוהו דילמות ייחודיות של תפקיד ואחריות. נדרשות מסגרות עיצוב אחראיות לשמירת שליטה אנושית.",
       "analysis_long": "מאמר תיאורטי ב-Frontiers Psychology שחקר ממדים פסיכו-אתיים של HAI בהקשר ביטחוני. שיטה: סינתז ספרות פסיכולוגיה, פילוסופיה ו-HFE. ממצאים: HAT לביטחון מציב דילמות ייחודיות של אחריות ותפקיד. תובנה ל-HFE: מסגרות HAT חייבות לשמר אחריות אנושית ותחושת שליטה.",
-      "apa": "Lo Bue, S., Prével, A., & Salatino, A. (2026). Exploring Human-Autonomous Interactions. Frontiers in Psychology."
+      "apa": "Lo Bue, S., Prével, A., & Salatino, A. (2026). Exploring Human-Autonomous Interactions. Frontiers in Psychology.",
+      "abstract_en": "This theoretical paper explores philosophical and ethical dimensions of human-autonomous system interactions in defense settings, synthesizing literature from psychology, philosophy, and human factors engineering. The research identifies unique dilemmas of agency, moral responsibility, and role definition that emerge in human-autonomous teaming (HAT) for defense applications. Findings call for responsible design frameworks that preserve human oversight, accountability, and a meaningful sense of control when deploying autonomous systems.",
+      "abstract_he": "מאמר תיאורטי ב-Frontiers Psychology שחקר ממדים פסיכו-אתיים של HAI בהקשר ביטחוני. שיטה: סינתז ספרות פסיכולוגיה, פילוסופיה ו-HFE. ממצאים: HAT לביטחון מציב דילמות ייחודיות של אחריות ותפקיד. תובנה ל-HFE: מסגרות HAT חייבות לשמר אחריות אנושית ותחושת שליטה."
     },
     {
       "url": "https://dl.acm.org/doi/proceedings/10.1145/3772318",
@@ -1785,7 +1835,9 @@ const REGISTRY = {
       "analysis_short": "מערכת CoNode לויזואליזציה וניהול ידע בתהליכי עיצוב שיתופי בין צוות ל-AI.",
       "analysis_medium": "מחקר CHI 2026 שפיתח CoNode לתמיכה בשיתוף ידע ועיצוב שיתופי בין צוות ל-AI. ויזואליזציה של זרימת עבודה שיפרה עקביות ורכישת ידע. שיתוף פעולה עם AI הפך שקוף יותר.",
       "analysis_long": "מחקר CHI 2026 שפיתח CoNode לניהול ידע בעיצוב שיתופי צוות-AI. שיטה: פיתוח פרוטוטיפ + הערכת משתמשים. ממצאים: ויזואליזציה workflow שיפרה הבנה קבוצתית ועקביות; ידע זמין מהר יותר. תובנה ל-HFE: ממשקים ויזואליים לניהול ידע ב-HAT קריטיים להצלחת שיתוף פעולה.",
-      "apa": "Zhou, Y., et al. (2026). CoNode: Visualizing Workflows for Knowledge Reuse in Team-AI Collaborative Design. CHI '26. ACM."
+      "apa": "Zhou, Y., et al. (2026). CoNode: Visualizing Workflows for Knowledge Reuse in Team-AI Collaborative Design. CHI '26. ACM.",
+      "abstract_en": "This CHI 2026 paper presents CoNode, a system designed to support knowledge reuse and recombination in team-AI collaborative design workflows. Through prototype development and user evaluation, the research shows that workflow visualization significantly improves team consistency and accelerates knowledge acquisition. Results demonstrate that structured knowledge management interfaces make AI collaboration more transparent and support better collective decision-making in complex design tasks.",
+      "abstract_he": "מחקר CHI 2026 שפיתח CoNode לניהול ידע בעיצוב שיתופי צוות-AI. שיטה: פיתוח פרוטוטיפ + הערכת משתמשים. ממצאים: ויזואליזציה workflow שיפרה הבנה קבוצתית ועקביות; ידע זמין מהר יותר. תובנה ל-HFE: ממשקים ויזואליים לניהול ידע ב-HAT קריטיים להצלחת שיתוף פעולה."
     },
     {
       "url": "https://scholar.google.com/scholar?q=Wahlstrom+2026+Intelligent+Machines+Climate+Change",
@@ -1802,7 +1854,9 @@ const REGISTRY = {
       "analysis_short": "מסגרת להשוואת יכולות מכונה לאנוש במשימות אקולוגיות מערכתיות עם שימוש בספרות HF.",
       "analysis_medium": "מחקר שבחן תפקיד מכונות חכמות (כולל UAS) בהתמודדות עם שינוי אקלים, תוך שימוש בספרות HF. מכונות לא-מאוישות מצטיינות בניטור ארוך-טווח. פעולה מערכתית דורשת שיתוף אנוש-מכונה.",
       "analysis_long": "מחקר שניתח תפקיד מכונות חכמות בפתרון שינוי אקלים. שיטה: שימוש בספרות HF להשוואת יכולות אנוש-מכונה. ממצאים: UAS יעילים לניטור ארוך-טווח ואיסוף נתונים סביבתיים. תובנה ל-HFE: שינוי האקלים יוצר שדה יישום חדש למסגרות HF לניהול מכונות אוטונומיות.",
-      "apa": "Wahlström, M. (2026). Intelligent Machines for Systemic Climate Change Mitigation."
+      "apa": "Wahlström, M. (2026). Intelligent Machines for Systemic Climate Change Mitigation.",
+      "abstract_en": "This technical report analyzes the role of intelligent machines—including unmanned aerial systems—in addressing systemic climate change challenges. Drawing on human factors literature to compare human and machine capabilities across environmental tasks, the author finds UAS particularly well-suited for long-term autonomous monitoring and environmental data collection. The work concludes that effective systemic climate action requires structured human-machine collaboration frameworks, positioning climate change as an emerging domain for human factors research.",
+      "abstract_he": "מחקר שניתח תפקיד מכונות חכמות בפתרון שינוי אקלים. שיטה: שימוש בספרות HF להשוואת יכולות אנוש-מכונה. ממצאים: UAS יעילים לניטור ארוך-טווח ואיסוף נתונים סביבתיים. תובנה ל-HFE: שינוי האקלים יוצר שדה יישום חדש למסגרות HF לניהול מכונות אוטונומיות."
     }
   ]
 };
@@ -1837,30 +1891,87 @@ function analysisHtml(a, level) {
   return `<div class="analysis-block"><div class="level-label ${lblCls}">${lbl}</div><div class="analysis-text ${lvCls}">${text}</div></div>`;
 }
 
+let _cardCounter = 0;
+
+function copyLink(url, btnEl) {
+  navigator.clipboard.writeText(url).then(() => {
+    const orig = btnEl.innerHTML;
+    btnEl.innerHTML = '✅ הועתק';
+    btnEl.classList.add('copy-done');
+    setTimeout(() => { btnEl.innerHTML = orig; btnEl.classList.remove('copy-done'); }, 1800);
+  }).catch(() => {
+    prompt('העתק את הקישור:', url);
+  });
+}
+
+function toggleAbstract(id, lang) {
+  const en = document.getElementById(id+'-en');
+  const he = document.getElementById(id+'-he');
+  const tabEn = document.getElementById(id+'-tab-en');
+  const tabHe = document.getElementById(id+'-tab-he');
+  if (!en || !he) return;
+  if (lang === 'en') {
+    en.classList.toggle('visible');
+    he.classList.remove('visible');
+    tabEn.classList.toggle('active');
+    tabHe.classList.remove('active');
+  } else {
+    he.classList.toggle('visible');
+    en.classList.remove('visible');
+    tabHe.classList.toggle('active');
+    tabEn.classList.remove('active');
+  }
+}
+
 function articleCard(a, detailLevel) {
   const isRecur = a.times_seen > 1;
   const age     = ageLabel(a.first_seen);
-  const scanAge = ageLabel(a.scan_date);
+  const uid     = 'card-' + (++_cardCounter);
+
+  // PDF badge
+  const pdfBadge = a.pdf
+    ? `<a href="${a.url}" target="_blank" class="action-btn pdf-open">📄 PDF פתוח</a>`
+    : `<span class="action-btn pdf-lock" title="PDF לא זמין בגישה חופשית">🔒 PDF חסום</span>`;
+
+  // Abstract section
+  const hasEn = !!(a.abstract_en);
+  const hasHe = !!(a.abstract_he || a.analysis_long);
+  const heText = a.abstract_he || a.analysis_long || '';
+  const enText = a.abstract_en || '';
+
+  const abstractSection = (hasEn || hasHe) ? `
+  <div class="abstract-section">
+    <div class="abstract-lang-tabs">
+      ${hasHe ? `<div class="ab-tab" id="${uid}-tab-he" onclick="toggleAbstract('${uid}','he')">🇮🇱 עברית</div>` : ''}
+      ${hasEn ? `<div class="ab-tab" id="${uid}-tab-en" onclick="toggleAbstract('${uid}','en')">🇺🇸 English</div>` : ''}
+    </div>
+    ${hasHe ? `<div class="abstract-body abstract-he" id="${uid}-he">${heText}</div>` : ''}
+    ${hasEn ? `<div class="abstract-body abstract-en" id="${uid}-en">${enText}</div>` : ''}
+  </div>` : '';
 
   return `
 <div class="article-card ${cardCls(a.times_seen)}" data-domain="${a.domain}" data-first="${a.first_seen}" data-seen="${a.times_seen}">
   <div class="article-header">
-    <div class="article-title">${a.title}</div>
+    <div class="article-title" dir="ltr">${a.title}</div>
     <span class="freq-tag ${freqCls(a.times_seen)}" title="נסרק ${a.times_seen} פעמים">×${a.times_seen}</span>
   </div>
   <div class="date-row">
     <span class="date-tag">📅 פורסם: <span class="dt-val">${a.pub_year}</span></span>
-    <span class="date-tag">👁 נסרק לראשונה: <span class="dt-val ${age.cls}">${a.first_seen}</span> <span class="${age.cls}">${age.txt}</span></span>
-    ${a.scan_date !== a.first_seen ? `<span class="date-tag">🔄 סריקה אחרונה: <span class="dt-val">${a.scan_date}</span></span>` : ''}
+    <span class="date-tag">👁 נסרק: <span class="dt-val ${age.cls}">${a.first_seen}</span> <span class="${age.cls}">${age.txt}</span></span>
   </div>
   <div class="article-chips">
     <span class="badge ${domainCls(a.domain)}">${a.domain}</span>
     ${isRecur ? `<span class="badge badge-recur ${a.times_seen>=3?'badge-recur2':''}">🔁 חוזר ×${a.times_seen}</span>` : ''}
     <span style="font-size:11px;color:var(--muted);">${a.authors}</span>
-    <a href="${a.url}" target="_blank" style="font-size:11px;color:var(--accent);text-decoration:none;margin-right:auto;" dir="ltr">🔗 קישור</a>
   </div>
   ${analysisHtml(a, detailLevel)}
-  ${a.folders && a.folders.length>1 ? `<div style="font-size:10px;color:var(--muted);margin-top:6px;direction:ltr;">📁 ${a.folders.join(' · ')}</div>` : ''}
+  ${abstractSection}
+  <div class="card-actions">
+    <button class="action-btn" onclick="copyLink('${a.url}',this)">📋 העתק קישור</button>
+    ${pdfBadge}
+    <a href="${a.url}" target="_blank" class="action-btn">🔗 פתח מאמר</a>
+    ${a.folders && a.folders.length>1 ? `<span style="font-size:10px;color:var(--muted);margin-right:auto;direction:ltr;">📁 ${a.folders.join(' · ')}</span>` : ''}
+  </div>
 </div>`;
 }
 
@@ -1892,6 +2003,36 @@ function clearDates() {
   document.getElementById('dateFrom').value = '';
   document.getElementById('dateTo').value   = '';
   dateFrom = ''; dateTo = '';
+  document.querySelectorAll('.quick-date-btn').forEach(b=>b.classList.remove('active'));
+  applyFilters();
+}
+
+function quickDate(period, btn) {
+  document.querySelectorAll('.quick-date-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const now = new Date();
+  const fmt  = d => d.toISOString().slice(0,10);
+  if (period === 'all') {
+    document.getElementById('dateFrom').value = '';
+    document.getElementById('dateTo').value   = '';
+    dateFrom = ''; dateTo = '';
+  } else if (period === 'day') {
+    const yesterday = new Date(now); yesterday.setDate(now.getDate()-1);
+    document.getElementById('dateFrom').value = fmt(yesterday);
+    document.getElementById('dateTo').value   = fmt(now);
+    dateFrom = fmt(yesterday); dateTo = fmt(now);
+  } else if (period === 'week') {
+    const weekAgo = new Date(now); weekAgo.setDate(now.getDate()-7);
+    document.getElementById('dateFrom').value = fmt(weekAgo);
+    document.getElementById('dateTo').value   = fmt(now);
+    dateFrom = fmt(weekAgo); dateTo = fmt(now);
+  } else if (period === 'lastrun') {
+    const history = REGISTRY._meta.scan_history || [];
+    const lastDate = history.length ? history[history.length-1].date : '';
+    document.getElementById('dateFrom').value = lastDate;
+    document.getElementById('dateTo').value   = lastDate;
+    dateFrom = lastDate; dateTo = lastDate;
+  }
   applyFilters();
 }
 
